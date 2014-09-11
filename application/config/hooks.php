@@ -10,7 +10,18 @@
 |
 */
 
+$hook['pre_controller'][] = array(
+	'class' => 'Template',
+	'function' => 'render_header',
+	'filename' => 'Template.php',
+	'filepath' => 'libraries'
+	);
 
-
+$hook['display_override'] = array(
+	'class' => 'Template',
+	'function' => 'display_page',
+	'filename' => 'Template.php',
+	'filepath' => 'libraries'
+	);
 /* End of file hooks.php */
 /* Location: ./application/config/hooks.php */

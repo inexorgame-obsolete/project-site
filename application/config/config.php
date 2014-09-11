@@ -5,7 +5,7 @@
 | Base Site URL
 |--------------------------------------------------------------------------
 |
-| URL to your CodeIgniter root. Typically this will be your base URL,
+| URL to your CodeIgniter root. typeically this will be your base URL,
 | WITH a trailing slash:
 |
 |	http://example.com/
@@ -21,12 +21,12 @@ $config['base_url']	= '';
 | Index File
 |--------------------------------------------------------------------------
 |
-| Typically this will be your index.php file, unless you've renamed it to
+| typeically this will be your index.php file, unless you've renamed it to
 | something else. If you are using mod_rewrite to remove the page set this
 | variable so that it is blank.
 |
 */
-$config['index_page'] = 'index.php';
+$config['index_page'] = '';
 
 /*
 |--------------------------------------------------------------------------
@@ -91,7 +91,7 @@ $config['charset'] = 'UTF-8';
 | setting this variable to TRUE (boolean).  See the user guide for details.
 |
 */
-$config['enable_hooks'] = FALSE;
+$config['enable_hooks'] = TRUE;
 
 
 /*
@@ -224,7 +224,7 @@ $config['cache_path'] = '';
 | MUST set an encryption key.  See the user guide for info.
 |
 */
-$config['encryption_key'] = '';
+$config['encryption_key'] = 'IN9Yp38zPXzdSI3dPsjspoabKWuY9dZpxZgbAVmvBdtCbgT8ZLTqxJJieSZGt2V6H1uor2RHCTpgpEKBOQTvPDR34qG6v8VuntOhTKcV37dCbOV8gu8nMod7UuYSPq2fYan8tAgS0AEtuMUtF95WERRODW4RhpCIIYCU12fK0Q3y4tpZvdrBrpzjJOXnUYAP8mlhTzWu5yXvXozLHKvmujE33o5qguxQ6yS72Z8fWnVhDYZ8iyF3qcVjsKiQ6bTD20d15ajfLcpRSO6vr3bHNZTs3uuuv3pSudTQtBf0X0MW';
 
 /*
 |--------------------------------------------------------------------------
@@ -261,7 +261,7 @@ $config['sess_time_to_update']	= 300;
 |
 | 'cookie_prefix' = Set a prefix if you need to avoid collisions
 | 'cookie_domain' = Set to .your-domain.com for site-wide cookies
-| 'cookie_path'   =  Typically will be a forward slash
+| 'cookie_path'   =  typeically will be a forward slash
 | 'cookie_secure' =  Cookies will only be set if a secure HTTPS connection exists.
 |
 */
