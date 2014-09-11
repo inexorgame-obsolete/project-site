@@ -21,5 +21,18 @@ class Permission_model extends CI_Model {
 		return $query->result_array();
 	}
 
+	public function new($name, $description, $default, $parent = NULL) {
+		if($default) $default = true;
+		else $default = false;
+		$data = array(
+			'name' => $name,
+			'description' => $description,
+			'default' => $default
+		);
+		if(is_int($parent)) {
+			$data['parent'] = $parent;
+		}
+		$this->db->insert($this->_table, $data);
+	}
 
 }
