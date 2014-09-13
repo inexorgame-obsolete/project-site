@@ -14,17 +14,20 @@ class Blog extends CI_Controller {
 		$this->load->helper('blog_helper');
 		$this->load->library('htmlfilter');
 
+		$this->load->library('permissions');
 
 		$this->load->library('template');
 	}
 
 	public function index($site = 1)
 	{
-		if($site != (string) (int) $site) $site = 1;
+		if($site != isint($site)) $site = 1;
 		$site = $site - 1;
 		$start = $site * 10;
 		$creators = array();
 		$user = $this->ion_auth->user()->row();
+
+		$this->permissions->set_user($user->id);
 		if($user == false)
 		{
 			$permissions = false;
@@ -74,7 +77,7 @@ class Blog extends CI_Controller {
 		}
 
 		$access = false;
-		if($slug == (string) (int) $slug) {
+		if($slug == isint($slug)) {
 			$entry = $this->blog_model->get_by_id($slug);
 		} else {
 			$entry = $this->blog_model->get_by_slug($slug);
@@ -263,7 +266,7 @@ class Blog extends CI_Controller {
 
 	public function _remap($method, $params)
 	{
-		if($method == (string) (int) $method)
+		if($method == isint($method))
 		{
 			return $this->index($method);
 		}
