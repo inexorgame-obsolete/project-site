@@ -23,7 +23,7 @@ class Pgroups_model extends CI_Model {
 		return $query->result_array();
 	}
 
-	public function new($name, $description, $significance = NULL) {
+	public function new_group($name, $description, $significance = NULL) {
 		$data = array(
 			'name' => $name,
 			'description' => $description

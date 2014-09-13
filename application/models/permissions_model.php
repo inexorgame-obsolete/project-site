@@ -1,5 +1,5 @@
 <?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
-class Permission_model extends CI_Model {
+class Permissions_model extends CI_Model {
 
 	public function __construct() {
 		parent::__construct();
@@ -21,7 +21,7 @@ class Permission_model extends CI_Model {
 		return $query->result_array();
 	}
 
-	public function new($name, $description, $default, $parent = NULL) {
+	public function new_permission($name, $description, $default, $parent = NULL) {
 		if($default) $default = true;
 		else $default = false;
 		$data = array(
