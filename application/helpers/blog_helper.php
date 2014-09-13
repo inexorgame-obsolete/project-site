@@ -35,7 +35,7 @@ function create_html_from_array($array)
 
 function create_blog_post_from_array($array, $entry_id, $open_tags = array(),  $id = false)
 {
-	if($entry_id != (string) (int) $entry_id) { trigger_error('No $entry_id set.'); $entry_id = rand(0, 9999); };
+	if($entry_id != isint($entry_id)) { trigger_error('No $entry_id set.'); $entry_id = rand(0, 9999); };
 	if(!is_int($id)) $id = 0;
 	$singleton_tags = array(
 		"img",

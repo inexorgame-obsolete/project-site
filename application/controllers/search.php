@@ -50,8 +50,8 @@ class Search extends CI_Controller {
 		}
 		else
 		{
-			if($start != (string) (int) $start) $start = 0;
-			if($limit != (string) (int) $limit) $limit = 30;
+			if($start != isint($start)) $start = 0;
+			if($limit != isint($limit)) $limit = 30;
 			if(1 > $limit || $limit > $this->config->item('max_results')) $limit = 30;
 			$search = urldecode($search);
 			if($object == 'user')

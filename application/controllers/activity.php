@@ -78,13 +78,13 @@ class Activity extends CI_Controller {
 			'name' => 'submit',
 			'value' => 'Post changes'
 		);
-
+		
 		return $data;
 	}
 
 	public function _remap($method, $params)
 	{
-		if($method == (string) (int) $method)
+		if($method == isint($method))
 		{
 			return $this->index($method);
 		}

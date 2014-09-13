@@ -400,7 +400,7 @@ class User extends CI_Controller {
 		{
 			return call_user_func_array(array($this, $method), $params);
 		} 
-		elseif((string) (int) $method == $method)
+		elseif(isint($method) == $method)
 		{
 			$params['id'] = $method;
 			return call_user_func_array(array($this, 'view'), $params);

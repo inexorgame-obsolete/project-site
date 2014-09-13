@@ -24,8 +24,8 @@ class Blog_model extends CI_Model
 
 	public function get_posts_for_user($userid = false, $posts = 10, $start = 0, $is_admin = false)
 	{
-		if($posts < 0 || $posts === false || $posts != (string) (int) $posts) $posts = 10;
-		if($start < 0 || $start === false || $start != (string) (int) $start) $start = 0;
+		if($posts < 0 || $posts === false || $posts != isint($posts)) $posts = 10;
+		if($start < 0 || $start === false || $start != isint($start)) $start = 0;
 		$this->db->order_by('id', 'desc');
 		if($is_admin) $query = $this->db->get($this->_table, $posts, $start);
 		else {
@@ -38,7 +38,7 @@ class Blog_model extends CI_Model
 
 	public function max_pagination($posts = 10, $userid = false, $is_admin = false)
 	{
-		if($posts < 0 || $posts === false || $posts != (string) (int) $posts) $posts = 10;
+		if($posts < 0 || $posts === false || $posts != isint($posts)) $posts = 10;
 		$this->db->order_by('id', 'desc');
 		if($is_admin) $query = $this->db->get($this->_table);
 		else {

@@ -51,7 +51,7 @@ class Activity_log_model extends CI_Model
 
 	public function max_pagination($posts = 30, $public_only = TRUE)
 	{
-		if($posts < 0 || $posts === false || $posts != (string) (int) $posts) $posts = 30;
+		if($posts < 0 || $posts === false || $posts != isint($posts)) $posts = 30;
 		if($public_only)
 		{
 			$query = $this->db->get_where('activity_log', array('public' => TRUE));
