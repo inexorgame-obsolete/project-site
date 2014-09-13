@@ -23,12 +23,18 @@ class Pgroups_model extends CI_Model {
 		return $query->result_array();
 	}
 
-	public function new_group($name, $description) {
+	public function new($name, $description, $significance = NULL) {
 		$data = array(
 			'name' => $name,
 			'description' => $description
 		);
+		if(is_int($significance)) { $data['significance'] = $significance; }
 		$this->db->insert($this->_table, $data);
+	}
+
+	public function change_significance($id, $significance) {
+		$this->db->where('id', $id);
+		$this->db->update($this->_table, array('significance' => $significance));
 	}
 
 }

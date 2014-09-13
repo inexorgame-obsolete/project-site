@@ -37,7 +37,7 @@ class Subgroup_model extends CI_Model {
 	public function subgroup($subgroup)
 	{
 		$identifier = 'name';
-		if($subgroup == isint($subgroup)) $identifier = 'id';
+		if($subgroup == (string) (int) $subgroup) $identifier = 'id';
 		$query = $this->db->get_where($this->_tables['subgroups'], array($identifier => $subgroup, 'parent' => $this->_parent));
 		$this->_reset_to_defaults();
 		return $query;
@@ -65,7 +65,7 @@ class Subgroup_model extends CI_Model {
 
 	public function set_user($id)
 	{
-		if($id == isint($id))
+		if($id == (string) (int) $id)
 		$this->_user = $id;
 	}
 
@@ -87,7 +87,7 @@ class Subgroup_model extends CI_Model {
 	}
 
 	private function _group_id($string) {
-		if($string != isint($string))
+		if($string != (string) (int) $string)
 		{
 			$string = $this->group_id($string);
 		}
@@ -96,7 +96,7 @@ class Subgroup_model extends CI_Model {
 
 	private function _subgroup_id($string)
 	{
-		if($string != isint($string))
+		if($string != (string) (int) $string)
 		{
 			$string = $this->subgroup_id($string);
 		}
