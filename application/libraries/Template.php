@@ -1,11 +1,13 @@
 <?php
-// if ( ! defined('BASEPATH')) exit('No direct script access allowed');
-class Template extends CI_Controller {
+if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+class Template {
 	private $_data;
 	private $_head;
 	private $_variables;
+	private $_CI;
+
 	public function __construct() {
-		parent::__construct();
+		$this->_CI =& get_instance();
 		$this->config->load('template', FALSE);
 		$this->config->load('search', FALSE);
 		$this->config->load('data', TRUE);
@@ -66,10 +68,22 @@ class Template extends CI_Controller {
 		}
 	}
 
+	public function __get($var)
+	{
+		return $this->_CI->$var;
+	}
+
 	public function print_console($data) {
 		if(is_array($data) || is_object($data)) $data = json_encode((array) $data);
 		elseif (!is_numeric($data)) $data = '"' . (string) $data . '"';
 		$this->add_head('<script>console.log(' . $data . ')</script>');
+	}
+
+	public function prevent_variables($text) {
+		return str_replace(array("{", "}"), array("{<", ">}"), $text);
+	}
+	public function prevent_replace($text) {
+		return $this->prevent_variables($text);
 	}
 
 	public function render_header() {
@@ -121,7 +135,7 @@ class Template extends CI_Controller {
 
 	public function set_title($title)
 	{
-		$this->variable('title', htmlentities($title), TRUE);
+		$this->variable('title', $this->config->item('title')['prefix'] . htmlentities($title) . $this->config->item('title')['suffix'], TRUE);
 	}
 
 	public function variable($key, $value = FALSE, $force = FALSE) {
@@ -220,6 +234,8 @@ class Template extends CI_Controller {
 		$output = $this->output->get_output();
 		if($disable == FALSE)
 		{
+			if(strlen($this->variable('title')) < 1)
+				$this->variable('title', $this->config->item('title')['default'], TRUE);
 			$variables = $this->config->item('variables');
 			$output = preg_replace_callback('/{([^\:{<}]*):([^{>}]*)}/', function ($hits) {
 				$var = $this->variable($hits[1]);
