@@ -6,8 +6,8 @@ class Blog_model extends CI_Model
 	{
 		parent::__construct();
 		$this->load->database();
-		$this->load->library('ion_auth');
-		$this->_user = $this->ion_auth->user()->row();
+		$this->load->library('auth');
+		$this->_user = $this->auth->user();
 	}
 
 	public function get_by_id($id)

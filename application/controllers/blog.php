@@ -5,7 +5,6 @@ class Blog extends CI_Controller {
 		parent::__construct();
 		$this->load->library('Config_validations', array('data'));
 
-		$this->load->library('ion_auth');
 		$this->load->model('subgroup_model');
 		$this->load->model('blog_model');
 		$this->load->database();
@@ -13,8 +12,8 @@ class Blog extends CI_Controller {
 		$this->load->config('data', TRUE);
 		$this->load->helper('blog_helper');
 		$this->load->library('htmlfilter');
-
 		$this->load->library('permissions');
+		$this->load->library('auth');
 
 		$this->load->library('template');
 	}
@@ -25,9 +24,11 @@ class Blog extends CI_Controller {
 		$site = $site - 1;
 		$start = $site * 10;
 		$creators = array();
-		$user = $this->ion_auth->user()->row();
+		$user = $this->auth->user();
 
-		$this->permissions->set_user($user->id);
+		if($user) {
+			$this->permissions->set_user($user->id);
+		}
 		if($user == false)
 		{
 			$permissions = false;
@@ -42,7 +43,7 @@ class Blog extends CI_Controller {
 		{
 			$posts[$i]['body'] = unserialize($posts[$i]['body']);
 			if(!isset($creators[$posts[$i]['user_id']])) {
-				$creators[$posts[$i]['user_id']] = $this->ion_auth->user($posts[$i]['user_id'])->row();
+				$creators[$posts[$i]['user_id']] = $this->auth->user($posts[$i]['user_id']);
 			}
 		}
 		$data = array(
@@ -66,7 +67,7 @@ class Blog extends CI_Controller {
 			$this->index();
 			return;
 		}
-		$user = $this->ion_auth->user()->row();
+		$user = $this->auth->user();
 		if($user == false)
 		{
 			$permissions = false;
@@ -91,7 +92,7 @@ class Blog extends CI_Controller {
 		if((isset($user) && $permissions && ($user->id == $entry->user_id || $permissions->user_in_subgroup('release_entry'))) || $entry->public == true) $access = true;
 		else { $this->template->render_permission_error(); return; }
 		$data['entry'] = $entry;
-		$data['creator'] = $this->ion_auth->user($entry->user_id)->row();
+		$data['creator'] = $this->auth->user($entry->user_id);
 
 
 		$data['user_may_release'] = false;
@@ -104,19 +105,17 @@ class Blog extends CI_Controller {
 
 	public function create($subblog = 'main') {
 
-		$user = $this->ion_auth->user()->row();
+		$user = $this->auth->user();
 		
 		if(!$user) { redirect('user/register'); return; }
 
-		$permissions = $this->subgroup_model;
-		$permissions->set_user($user->id);
-		$permissions->set_parent('blog_entry_creator');
-
-		if(!$permissions->user_in_group()) { $this->template->render_permission_error(); return; }
+		$this->permissions->set_user($user->id);
+		
+		if(!$this->permissions->has_user_permission('blog_create')) { $this->template->render_permission_error(); return; }
 
 
 		$allow_release = false;
-		if($permissions->user_in_subgroup('release_entry'))
+		if($this->permissions->has_user_permission('blog_publish'))
 		{
 			$allow_release = true;
 		}

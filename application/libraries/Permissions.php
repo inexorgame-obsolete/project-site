@@ -39,8 +39,8 @@ class Permissions {
 			// Check if permissions are directly assigned to user
 			foreach($required_permissions as $p) {
 				$has_user_permission = $this->_CI->users_permissions_model->has_user_permission($this->_userid, $p);
-				if($has_user_permission===false) return false;
-				elseif($has_user_permission===true) unset($required_permissions[$p]);
+				if($has_user_permission === false) return false;
+				elseif($has_user_permission === true) unset($required_permissions[$p]);
 			}
 
 			// Check if permissions are assigned to group and fit the rules
@@ -65,7 +65,7 @@ class Permissions {
 		$permission = $this->_get_permission($id);
 		if(!is_array($parents)) $parents = array();
 		if(isset($permission->parent) && $permission->parent != NULL) {
-			$permission->parent = (int) $permission->parent;
+			isint($permission->parent);
 			$parents   = call_user_func_array(array($this, __FUNCTION__), array($permission->parent, $parents));
 			$parents[] = $permission->parent;
 		}
@@ -76,7 +76,7 @@ class Permissions {
 		if($permission = $this->_get_permission_from_array($code)) {
 			return $permission;
 		}
-		if(is_int($code)) $permission = $this->_CI->permissions_model->get_permission($code);
+		if(isint($code)) $permission = $this->_CI->permissions_model->get_permission($code);
 		else $permission = $this->_CI->permissions_model->get_permission_by_name($code); 
 		if(count($permission) === 0) { return false; }
 		$this->_permissions[$permission->id] = $permission;
@@ -85,7 +85,7 @@ class Permissions {
 	}
 
 	private function _get_permission_from_array($code) {
-		if(is_int($code) && isset($this->_permissions[$code])) {
+		if(isint($code) && isset($this->_permissions[$code])) {
 			return $this->_permissions[$code];
 		}
 		if (isset($this->_permissions_names[$code]) && isset($this->_permissions[$this->_permissions_names[$code]])) {

@@ -22,9 +22,9 @@ class Data_lib {
 	public function __construct() 
 	{
 		$this->_CI =& get_instance();
-		$this->_CI->load->library('ion_auth');
+		$this->_CI->load->library('auth');
 		$this->_CI->load->library('fileinfo');
-		$this->_CI->load->config('data', TRUE);
+		$this->_CI->config->load('data', true);
 		$this->_config = $this->_CI->config->item('data');
 		foreach($this->_config['dir'] as $i => $v) {
 			$this->_parse_dir($this->_config['dir'][$i]);
@@ -63,7 +63,7 @@ class Data_lib {
 			if($this->owner) {
 				$this->_ownerdir = $this->_config['dir']['user'];
 				$this->_parse_dir($this->_ownerdir, false);
-				$this->_ownerdir = FCPATH . $this->_ownerdir . $this->owner->id . '/';
+				$this->_ownerdir = FCPATH . $this->_ownerdir . $this->owner->unique_id . '/';
 			} else {
 				$this->_ownerdir = false;
 			}
@@ -104,12 +104,12 @@ class Data_lib {
 
 	public function set_user($userid = NULL)
 	{
-		$this->user = $this->_CI->ion_auth->user($userid)->row();
+		$this->user = $this->_CI->auth->user($userid)->row();
 	}
 
 	public function set_owner($userid = NULL)
 	{
-		$this->owner = $this->_CI->ion_auth->user($userid)->row();
+		$this->owner = $this->_CI->auth->user($userid)->row();
 		$this->ownerdir(true);
 	}
 
@@ -172,9 +172,9 @@ class Data_lib {
 
 	public function set_to_owner_dir()
 	{
-		if(isset($this->owner->id))
+		if(isset($this->owner->unique_id))
 		{
-			$this->set_dir($this->_config['dir']['user'] . $this->owner->id);
+			$this->set_dir($this->_config['dir']['user'] . $this->owner->unique_id);
 		} else {
 			return false;
 		}
@@ -264,7 +264,7 @@ class Data_lib {
 	{
 		if(!$this->_dir['internal'] || !$this->_dir['external'] || !$this->_dir['relative'])
 		{
-			if(isset($this->owner->id)) {
+			if(isset($this->owner->unique_id)) {
 				$this->set_to_owner_dir();
 			} else {
 				trigger_error("No file-direcotry & no owner defined.", E_USER_ERROR);

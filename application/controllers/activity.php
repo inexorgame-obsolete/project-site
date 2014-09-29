@@ -4,8 +4,8 @@ class Activity extends CI_Controller {
 	public function __construct() {
 		parent::__construct();
 
-		$this->load->library('ion_auth');
-		$this->load->model('subgroup_model');
+		$this->load->library('auth');
+		$this->load->library('permissions');
 		$this->load->model('blog_model');
 		$this->load->database();
 		$this->load->helper('template_helper');
@@ -26,14 +26,13 @@ class Activity extends CI_Controller {
 
 		$data['may_submit'] = FALSE;
 		$may_submit = FALSE;
-		$user = $this->ion_auth->user()->row();
+		$user = $this->auth->user();
 		$data['user'] = $user;
 		if($user) {
-			$permissions = $this->subgroup_model;
-			$permissions->set_user($user->id);
-			$permissions->set_parent('activity_log');
+			$this->permissions->set_user($user->id);
+			$see_all_posts = $this->permissions->has_user_permission('activity_log');
 
-			if($permissions->user_in_group()) { $data['may_submit'] = TRUE; $may_submit = TRUE; }
+			if($this->permissions->has_user_permission('activity_log_create')) { $data['may_submit'] = TRUE; $may_submit = TRUE; }
 		}
 		$data['form'] = $this->_index_post_data();
 
@@ -50,8 +49,7 @@ class Activity extends CI_Controller {
 			}
 		}
 
-		$posts = $this->activity_log_model->get_newest_posts_with_users(!$may_submit, $start);
-		$data['posts'] = $posts;
+		$data['posts'] = $this->activity_log_model->get_newest_posts_with_users(!$see_all_posts, $start);	// 1st var is $public_only -> so opposite of $see_all_posts
 		$data['max_pagination'] = $this->activity_log_model->max_pagination(30, !$may_submit);
 		$this->load->view('activity/index', $data);
 	}

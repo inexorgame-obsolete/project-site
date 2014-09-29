@@ -7,8 +7,8 @@ class Activity_log_model extends CI_Model
 	{
 		parent::__construct();
 		$this->load->database();
-		$this->load->library('ion_auth');
-		$this->_user = $this->ion_auth->user()->row();
+		$this->load->library('auth');
+		$this->_user = $this->auth->user();
 	}
 
 	public function get_newest_posts($public_only = TRUE, $start = 0, $posts = 30)
@@ -30,7 +30,7 @@ class Activity_log_model extends CI_Model
 		foreach($posts as $i => $p)
 		{
 			if(isset($users[$p['user_id']])) $posts[$i]['user'] = $users[$p['user_id']];
-			else $posts[$i]['user'] = $this->ion_auth->user($p['user_id'])->row();
+			else $posts[$i]['user'] = $this->auth->user($p['user_id']);
 		}
 		return $posts;
 	}

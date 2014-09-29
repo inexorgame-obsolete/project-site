@@ -34,9 +34,9 @@ class Pgroups_permissions_model extends CI_Model {
 	}
 
 	public function groupset_have_permissions($groupset, $permissions, &$permissions_array = array()) {
+		if(!is_array($permissions_array)) $permissions_array = array();
 		foreach($groupset as $g) {
 			$needed = array();
-			if(!isset($permissions_array[$g])) $permissions_array[$g] = array();
 			// Check if permission was already read from db
 			foreach($permissions as $p) {
 				if(isset($permissions_array[$g][$p]) && $permissions_array[$g][$p] == false) return false;

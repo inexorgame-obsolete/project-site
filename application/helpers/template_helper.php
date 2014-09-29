@@ -55,11 +55,10 @@ function background_image() {
 function showname($user, $class = "user") {
 	if(!is_array($user)) $user = (array) $user;
 	$return = '<span class="' . $class . '">';
-	if(strlen($user['first_name'])!==0) $return .= d($user['first_name']) . ' &laquo;';
-	elseif (strlen($user['last_name'])!==0) $return .= '&laquo;';
-	$return .= d($user['username']);
-	if(strlen($user['last_name'])!==0) $return .= '&raquo; ' . d($user['last_name']);
-	elseif(strlen($user['first_name'])!==0) $return .= '&raquo;';
+	if(strlen($user['ingame_name']) < 1)
+		$return .= d($user['username']);
+	else
+		$return .= d($user['ingame_name']);
 	$return .= '</span>';
 	return $return;
 }

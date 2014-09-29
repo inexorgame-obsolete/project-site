@@ -1,49 +1,42 @@
-
-<?php $cap = create_captcha($captcha); ?>
 <div class="centered">
       <h1 class="in-eyecatcher text-contrast">Register</h1>
-      <p>Please enter your information below.</p>
+      <p>Please enter your information below. You can extend your information later. All here requested information is neccessarray.</p>
 
-      <div id="infoMessage"><?php echo $message;?></div>
+      <?php echo form_open("user/register", array('class' => 'large'));?>
+            <div class="input">
+                  <?php echo form_label('Username: *', 'username');?><?php echo form_input($username);?>
+            </div>
 
-      <?php echo form_open("user/register");?>
+            <div class="input">
+                  <?php echo form_label('E-Mail: *', 'email');?><?php echo form_input($email);?>
+            </div>
 
-            <p>
-                  <?php echo lang('create_user_fname_label', 'first_name');?> <br />
-                  <?php echo form_input($first_name);?>
-            </p>
+            <div class="input">
+                  <?php echo form_label('Password: *', 'password');?><?php echo form_input($password);?>
+            </div>
 
-            <p>
-                  <?php echo lang('create_user_lname_label', 'last_name');?> <br />
-                  <?php echo form_input($last_name);?>
-            </p>
+            <div class="input">
+                  <?php echo form_label('Confirm password: *', 'password_confirm');?><?php echo form_input($password_confirm);?>
+            </div>
+            <div class="input">
+                  <div class="centered"><?= $captcha ?></div>
+            </div>
 
-            <p>
-                  <?php echo lang('create_user_username_label', 'username');?>* <br />
-                  <?php echo form_input($username);?>
-            </p>
+            <?php if(count($errors) > 0 && is_array($errors)) : ?>
+            <div class="input">
+                  <ul>
+                  <?php
+                        foreach($errors as $e) {
+                              echo "<li>" . $e . "</li>";
+                        }                  
+                  ?>
+                  </ul>
+            </div>
+            <?php endif; ?>
 
-            <p>
-                  <?php echo lang('create_user_email_label', 'email');?>* <br />
-                  <?php echo form_input($email);?>
-            </p>
-
-            <p>
-                  <?php echo lang('create_user_password_label', 'password');?>* <br />
-                  <?php echo form_input($password);?>
-            </p>
-
-            <p>
-                  <?php echo lang('create_user_password_confirm_label', 'password_confirm');?>* <br />
-                  <?php echo form_input($password_confirm);?>
-            </p>
-
-            <p>
-                  <?php echo $cap['image']; ?><br />
-                  <?php echo form_input($solve_captcha);?>
-            </p>
-
-            <p><?php echo form_submit('submit', 'Register');?></p>
+            <div class="input">
+                  <?php echo form_submit('submit', 'Register', 'class="centered"');?>
+            </div>
 
       <?php echo form_close();?>
 </div>

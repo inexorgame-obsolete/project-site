@@ -5,7 +5,7 @@ class Search extends CI_Controller {
 	{
 		parent::__construct();
 		$this->load->library('form_validation');
-		$this->load->library('ion_auth');
+		$this->load->library('auth');
 		$this->load->helper('url');
 		$this->load->config('search', FALSE);
 		$this->load->helper('template');
@@ -65,27 +65,18 @@ class Search extends CI_Controller {
 
 	function _search_user($username, $start = 0, $limit = 30)
 	{
-		$this->ion_auth->limit($limit, $start);
-		$this->ion_auth->order_by('username', 'asc');
-		$this->ion_auth->like('username', $username);
-		$this->ion_auth->like('first_name', $username);
-		$this->ion_auth->like('last_name', $username);
-		$users = $this->ion_auth->users()->result();
+		$whitelist_info = array('id', 'username', 'ingame_name', 'about', 'country_code'); // info submitted accessible via json api
+		$users = $this->auth->users_like(array(
+			'name'   => $username,
+			'limit'  => $limit,
+			'offset' => $start,
+		));
 		$return = array();
 		foreach($users as $u) 
 		{
-			$return[] = array(
-				'id' => $u->id,
-				'username' => $u->username,
-				'first_name' => $u->first_name,
-				'last_name' => $u->last_name,
-				'created_on' => $u->created_on,
-				'about' => $u->about,
-				'images' => array(
-					'avatar' => iimage($u->id, 1),
-					'background' => iimage($u->id, 2)
-				)
-			);
+			foreach($whitelist_info as $i) {
+				if(isset($u->$i)) $return[$i] = $u->$i;
+			}
 		}
 		return $return;
 	}

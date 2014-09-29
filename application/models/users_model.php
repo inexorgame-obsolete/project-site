@@ -3,9 +3,18 @@ class Users_model extends CI_Model {
 	private $_table = 'users';
 	private $_hash_algos = array('whirlpool', 'sha512');
 
+	private $_data_dir = false;
 	public function __construct() {
 		parent::__construct();
 		$this->load->database();
+		if(file_exists(FCPATH . 'application/config/data.php')) {
+			$this->config->load('data', true);
+			$dirs = $this->config->item('data')['dir'];
+			if(isset($dirs['user'])) $this->_data_dir = $dirs['user'];
+			if(strlen($this->_data_dir) > 0 && $this->_data_dir[strlen($this->_data_dir)-1] != "/" && $this->_data_dir[strlen($this->_data_dir)-1] != "\\") {
+				$this->_data_dir .= '/';
+			}
+		}
 	}
 
 
@@ -13,6 +22,30 @@ class Users_model extends CI_Model {
 		$this->db->where('id', $id);
 		$query = $this->db->get($this->_table);
 		return $query->row();
+	}
+
+	public function users_like($name, $columns = array('username', 'ingame_name'), $limit = NULL, $offset = NULL, $start = true, $end = true, $order = 'ASC', $by = 'username') {
+		if(is_array($name)) {
+			if(isset($name['columns']) && is_array($name['columns']))           $columns = $name['columns']; 
+			if(isset($name['limit'])   && isint($name['limit']))                $limit   = $name['limit'];   
+			if(isset($name['offset'])  && isint($name['offset']))               $offset  = $name['offset'];  
+			if(isset($name['start'])   && $name['start'] == false)              $start   = false;             else $start = true;
+			if(isset($name['end'])     && $name['end'] == false)                $end     = false;             else $end   = true;
+			if(isset($name['order'])   && strtolower($name['order']) == 'desc') $order   = 'DESC';            else $order = 'ASC';
+			if(isset($name['order_by']))                                        $by      = $name['order_by'];
+		elseif(isset($name['by']))                                              $by      = $name['by'];
+			if(isset($name['name']))                                            $name    = $name['name'];
+			else { throw new Exception('No name set at array for users_like.'); return; }
+		}
+		$this->db->limit($limit, $offset);
+		$this->db->order_by($by, $order);
+		$this->db->like($columns[0], $name);
+		unset($columns[0]);
+		foreach($columns as $column) {
+			$this->db->or_like($columns[0], $name);
+		}
+		return $this->db->get($this->_table)->result();
+
 	}
 
 	public function user_by_username($username) {
@@ -79,7 +112,7 @@ class Users_model extends CI_Model {
 		$u = $this->user_by_username($username);
 		$fielddata = $this->db->field_data($this->_table);
 		$id_maxlen = 11;
-		foreach($fielddata[0] as $f) { if($f->name == 'id') { $id_maxlen = $f->max_length; break; }}
+		foreach($fielddata as $f) { if($f->name == 'id') { $id_maxlen = $f->max_length; break; }}
 		$unique_id = uniqid(str_pad($u->id, $fielddata[0]->max_length, '0'), true);
 		$password = $this->hash_password($unique_id, $password);
 		$second_data = array(
@@ -89,17 +122,19 @@ class Users_model extends CI_Model {
 		);
 		$this->db->where('id', $u->id);
 		$this->db->update($this->_table, $second_data);
+		if(is_string($this->_data_dir)) mkdir(FCPATH . $this->_data_dir . $unique_id . '/');
 		return true;
 	}
 
-	public function check_password($username, $password, $active = TRUE)
+	public function check_password($username, $password, $active = TRUE, $email = FALSE)
 	{
-		$this->db->where('username', $username);
+		$this->db->where($email ? 'email' : 'username', $username);
 		$u = $this->db->get($this->_table)->row();
+		if(!$u) return false;
 		if($u->active == false && $active == true) return 0;
 		if($u->password == $this->hash_password($u->unique_id, $password))
 		{
-			return true;
+			return $u->id;
 		}
 		return false;
 	}

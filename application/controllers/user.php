@@ -6,32 +6,25 @@ class User extends CI_Controller {
 	function __construct()
 	{
 		parent::__construct();
-		$this->load->library('ion_auth');
 		$this->load->library('form_validation');
 		$this->load->helper('url');
 		$this->load->helper('template');
-		$this->lang->load('auth');
 		$this->load->helper('language');
 		$this->load->helper('captcha');
 		$this->load->library('fileinfo');
-		$this->load->config('ion_auth', TRUE);
+		$this->load->library('auth');
+		$this->load->library('reCaptcha');
 		$this->load->library('template');
-		$this->template = $this->template->get_instance();
 	}
 
 	function index()
 	{
-		// $this->ion_auth->limit(30);
-		// $this->ion_auth->order_by('username', 'asc');
-		// $users = $this->ion_auth->users()->result();
-		// $data['users'] = $users;
-
 		$this->form_validation->set_rules('search', 'search field', 'xss_clean|required');
 		if ($this->form_validation->run() == true) {
 			$search = $this->input->post('search');
 			redirect('/user/search/' . urlencode($search));
 		}
-		$user = $this->ion_auth->user()->row();
+		$user = $this->auth->user();
 		if($user) {
 			redirect('/user/' . $user->id);
 		} else {
@@ -39,6 +32,50 @@ class User extends CI_Controller {
 		}
 	}
 
+	function login($site = false) {
+		if($user = $this->auth->user()) redirect('user/' . $user->id);
+		$data = $this->_get_login_form();
+		$data['errors'] = false;
+		if(isset($_POST['submit'])) {
+			if($this->auth->login($_POST['username_email'], $_POST['password'], isset($_POST['stay_logged_in']))) {
+
+			} else {
+				$data['errors'] = array('Your password does not match to your e-mail or username.');
+			}
+		}
+
+		$this->_render_page('user/login', $data);
+	}
+
+	function logout() {
+		$this->auth->logout();
+		$this->_render_page('user/logout');
+	}
+
+	function register()
+	{
+		$this->template->set_title("Create User");
+		$this->data['errors'] = false;
+		if(isset($_POST['submit'])) {
+			$this->recaptcha->check_answer();
+			$errors = $this->auth->register_user(
+				$_POST['email'], 
+				$_POST['username'], 
+				$_POST['password'],
+				$_POST['password_confirm'],
+				$this->recaptcha->is_valid
+				);
+			if(count($errors) > 0 && is_array($errors)) {
+				$this->data['errors'] = $errors;
+			} else {
+				$this->_render_page('user/register_success', $this->data);
+				return;
+			}
+		}
+
+		$this->data = array_merge($this->data, $this->_get_register_form());
+		$this->_render_page('user/register', $this->data);
+	}
 
 	function search($string = false)
 	{
@@ -61,21 +98,16 @@ class User extends CI_Controller {
 			'value' => 'Search',
 		);
 
-		$this->ion_auth->limit(30);
-		$this->ion_auth->like('username', $string);
-		$this->ion_auth->like('first_name', $string);
-		$this->ion_auth->like('last_name', $string);
-		$users = $this->ion_auth->users()->result();
-		$data['users'] = $users;
+		$data['users'] = $this->auth->users_like($string);
 
 		$this->_render_page('user/list', $data);
 	}
 
 	function view($id = NULL)
 	{
-		$user = $this->ion_auth->user()->row();
+		$user = $this->auth->user();
 		if(!$id) redirect('/user/view/' . $user->id, 'refresh');
-		if(!$user || $id != $user->id) $view = $this->ion_auth->user($id)->row(); else $view = $user;
+		if(!$user || $id != $user->id) $view = $this->auth->user($id); else $view = $user;
 		if(!is_object($view))
 		{
 			show_404();
@@ -91,104 +123,12 @@ class User extends CI_Controller {
 		$this->_render_page('user/view_user', $data);
 	}
 
-	function register()
-	{
-		$this->data['title'] = "Create User";
-
-		$tables = $this->config->item('tables','ion_auth');
-		
-		//validate form input
-		$this->form_validation->set_rules('first_name', $this->lang->line('create_user_validation_fname_label'), 'xss_clean');
-		$this->form_validation->set_rules('last_name', $this->lang->line('create_user_validation_lname_label'), 'xss_clean');
-		$this->form_validation->set_rules('email', $this->lang->line('create_user_validation_email_label'), 'required|valid_email|is_unique['.$tables['users'].'.email]');
-		$this->form_validation->set_rules('username', $this->lang->line('create_user_validation_username_label'), 'required|xss_clean|is_unique['.$tables['users'].'.username]');
-		$this->form_validation->set_rules('password', $this->lang->line('create_user_validation_password_label'), 'required|min_length[' . $this->config->item('min_password_length', 'ion_auth') . ']|max_length[' . $this->config->item('max_password_length', 'ion_auth') . ']|matches[password_confirm]');
-		$this->form_validation->set_rules('password_confirm', $this->lang->line('create_user_validation_password_confirm_label'), 'required');
-
-		if ($this->form_validation->run() == true)
-		{
-			$username = $this->input->post('username');
-			$email    = strtolower($this->input->post('email'));
-			$password = $this->input->post('password');
-
-			$additional_data = array(
-				'first_name' => $this->input->post('first_name'),
-				'last_name'  => $this->input->post('last_name'),
-			);
-		}
-		if ($this->form_validation->run() == true && $this->ion_auth->register($username, $password, $email, $additional_data))
-		{
-			$this->_render_page('user/register_success', $this->data);
-		}
-		else
-		{
-			//display the create user form
-			//set the flash data error message if there is one
-			$this->data['message'] = (validation_errors() ? validation_errors() : ($this->ion_auth->errors() ? $this->ion_auth->errors() : $this->session->flashdata('message')));
-
-			$this->data['first_name'] = array(
-				'name'  => 'first_name',
-				'id'    => 'first_name',
-				'type'  => 'text',
-				'value' => $this->form_validation->set_value('first_name'),
-			);
-			$this->data['last_name'] = array(
-				'name'  => 'last_name',
-				'id'    => 'last_name',
-				'type'  => 'text',
-				'value' => $this->form_validation->set_value('last_name'),
-			);
-			$this->data['username'] = array(
-				'name'  => 'username',
-				'id'    => 'username',
-				'type'  => 'text',
-				'value' => $this->form_validation->set_value('username'),
-			);
-			$this->data['about'] = array(
-				'name'	=> 'about',
-				'id'	=> 'about',
-				'type'	=> 'textarea',
-				'value' => $this->form_validation->set_value('about')
-			);
-			$this->data['email'] = array(
-				'name'  => 'email',
-				'id'    => 'email',
-				'type'  => 'text',
-				'value' => $this->form_validation->set_value('email'),
-			);
-			$this->data['password'] = array(
-				'name'  => 'password',
-				'id'    => 'password',
-				'type'  => 'password',
-				'value' => $this->form_validation->set_value('password'),
-			);
-			$this->data['password_confirm'] = array(
-				'name'  => 'password_confirm',
-				'id'    => 'password_confirm',
-				'type'  => 'password',
-				'value' => $this->form_validation->set_value('password_confirm'),
-			);
-			$this->data['solve_captcha'] = array(
-				'name'  => 'solve_captcha',
-				'id'    => 'solve_captcha',
-				'type'  => 'text',
-				'value' => $this->form_validation->set_value('captcha'),
-			);
-			$chars['lower'] = "abcdefghijklmnopqrstuvwxyz";
-			$chars['upper'] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-			$chars['numbers'] = "0123456789";
-			foreach ($chars as $k => $v) { $part[$k] = substr(str_shuffle($v . $v . $v), 0, 3); }
-			$this->data['captcha'] = array(
-				'word' => str_shuffle($part['lower'] . $part['upper'] . $part['numbers']),
-				'img_path' => FCPATH . 'data/captcha/',
-				'img_url' => base_url('data/captcha') . '/',
-			);
-			$this->_render_page('user/register', $this->data);
-		}
-	}
-
 	function edit($slug = false, $value = false, $ajax = false) {
-		$user = $this->ion_auth->user()->row();
+		show_404();
+		return;
+
+		// Currently disabled.
+		$user = $this->auth->user()->row();
 		if($user == false) {
 			redirect('user/register');
 			return;
@@ -231,7 +171,7 @@ class User extends CI_Controller {
 			}
 		} 
 		if($ajax != true) {
-			$user = $this->ion_auth->user()->row();
+			$user = $this->auth->user();
 			$data['user'] = $user;
 			$data['edit_form']['username'] = array(
 				'type' => 'text',
@@ -246,20 +186,6 @@ class User extends CI_Controller {
 				'autocomplete' => 'off',
 				'name' => 'email',
 				'id' => 'edit_email'
-			);
-			$data['edit_form']['first_name'] = array(
-				'type' => 'text',
-				'value' => $user->first_name,
-				'autocomplete' => 'off',
-				'name' => 'first_name',
-				'id' => 'edit_first_name'
-			);
-			$data['edit_form']['last_name'] = array(
-				'type' => 'text',
-				'value' => $user->last_name,
-				'autocomplete' => 'off',
-				'name' => 'last_name',
-				'id' => 'edit_last_name'
 			);
 			$data['edit_form']['password'] = array(
 				'type' => 'password',
@@ -325,16 +251,12 @@ class User extends CI_Controller {
 			{
 				$error = array();
 				$username 				= $this->input->post($data['edit_form']['username']['name']);
-				$first_name 			= $this->input->post($data['edit_form']['first_name']['name']);
-				$last_name 				= $this->input->post($data['edit_form']['last_name']['name']);
 				$password				= $this->input->post($data['edit_form']['password']['name']);
 				$password_verification 	= $this->input->post($data['edit_form']['password_verification']['name']);
 				$about 					= $this->input->post($data['edit_form']['about']['name']);
-				$ion_auth_config		= $this->config->item('ion_auth');
+				$auth_config			= $this->config->item('auth');
 
-				$data['edit_form']['username']['value'] = $username;
-				$data['edit_form']['first_name']['value'] 	= $first_name;
-				$data['edit_form']['last_name']['value'] 	= $last_name;
+				$data['edit_form']['username']['value'] 	= $username;
 				$data['edit_form']['about']['value'] 		= $about;
 				if($this->ion_auth->hash_password_db($user->id, $this->input->post($data['edit_form']['old_password']['name']))) {
 
@@ -384,13 +306,63 @@ class User extends CI_Controller {
 		}
 	}
 
+	private function _get_register_form() {
+		$data['username'] = array(
+			'name'  => 'username',
+			'id'    => 'username',
+			'type'  => 'text',
+			'value' => isset($_POST['username']) ? $_POST['username'] : ''
+		);
+		$data['email'] = array(
+			'name'  => 'email',
+			'id'    => 'email',
+			'type'  => 'text',
+			'value' => isset($_POST['email']) ? $_POST['email'] : '',
+		);
+		$data['password'] = array(
+			'name'  => 'password',
+			'id'    => 'password',
+			'type'  => 'password',
+			'value' => isset($_POST['password']) ? $_POST['password'] : '',
+		);
+		$data['password_confirm'] = array(
+			'name'  => 'password_confirm',
+			'id'    => 'password_confirm',
+			'type'  => 'password',
+			'value' => isset($_POST['password_verification']) ? $_POST['password_verification'] : '',
+		);
+		$data['captcha'] = $this->template->prevent_variables($this->recaptcha->get_html());
+		return $data;
+	}
+
+	private function _get_login_form() {
+		$data['username_email'] = array(
+			'name'  => 'username_email',
+			'id'    => 'username_email',
+			'type'  => 'text',
+			'value' => isset($_POST['username_email']) ? $_POST['username_email'] : ''
+		);
+		$data['password'] = array(
+			'name'  => 'password',
+			'id'    => 'password',
+			'type'  => 'password',
+			'value' => isset($_POST['password']) ? $_POST['password'] : '',
+		);
+		$data['stay_logged_in'] = array(
+			'name'  => 'stay_logged_in',
+			'id'    => 'stay_logged_in',
+			'type'  => 'checkbox',
+		);
+		if(isset($_POST['stay_logged_in'])) {
+			$data['stay_logged_in']['checked'] = 'checked';
+		}
+		return $data;
+	}
+
 	function _render_page($view, $data=null, $render=false)
 	{
-
-		$this->viewdata = (empty($data)) ? $this->data: $data;
-
+		if(!empty($data)) $this->viewdata = $data;
 		$view_html = $this->load->view($view, $this->viewdata, $render);
-
 		if (!$render) return $view_html;
 	}
 

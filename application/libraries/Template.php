@@ -16,14 +16,14 @@ class Template {
 		$this->load->helper('url');
 		$this->load->helper('security');
 		$this->load->helper('language');
-		$this->load->library('ion_auth');
-		$this->_data['logged_in'] = $this->ion_auth->logged_in();
+		$this->load->library('auth');
+		$this->_data['logged_in'] = $this->auth->is_logged_in();
 
 		$base = $this->config->item('data')['location']['external'];
 		$this->_data['base'] = ($base === FALSE) ? base_url() : $base;
 		if($this->_data['logged_in'])
 		{
-			$user = (array) $this->ion_auth->user()->row();
+			$user = (array) $this->auth->user();
 			$unsets = array('password', 'salt', 'forgotten_password_code', 'forgotten_password_time', 'remember_code');
 			foreach($unsets as $u) { unset($user[$u]); }
 			$this->_data['user'] = $user;

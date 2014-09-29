@@ -5,7 +5,7 @@ class Data extends CI_Controller {
 	var $owner 	= FALSE;
 	public function __construct() {
 		parent::__construct();
-		$this->load->library('ion_auth');
+		$this->load->library('auth');
 		$this->load->model('subgroup_model');
 		$this->load->database();
 		$this->load->library('data_lib');
@@ -13,7 +13,7 @@ class Data extends CI_Controller {
 	}
 
 	public function api($command = FALSE, $ownerid = FALSE) {
-		$this->user = $this->ion_auth->user()->row();
+		$this->user = $this->auth->user();
 		$this->output->set_content_type('application/json');
 		if(!$this->user) {
 			$this->output->set_output(json_encode(array(
@@ -27,7 +27,7 @@ class Data extends CI_Controller {
 		if(!$ownerid || $ownerid == $this->user->id) {
 			$this->owner = $this->user;
 		} else {
-			$this->owner = $this->ion_auth->user($ownerid)->row();
+			$this->owner = $this->auth->user($ownerid)->row();
 		}
 		if(!$command)
 		{
