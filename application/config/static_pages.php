@@ -2,7 +2,6 @@
 
 // Possible is: head, js, css, title
 $config['home'] = array(
-	'title' => 'SauerFork',
 	'js' => array(
 		'jquery-ui.resizeable',
 		'image-comparison'
