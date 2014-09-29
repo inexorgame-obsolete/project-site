@@ -10,11 +10,15 @@ if(!function_exists('isint')) {
 }
 if(!function_exists('ip')) {
 	function ip() {
-		if($_SERVER['HTTP_X_FORWARDED_FOR']){
-			$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
-		} else { 
-			$ip = $_SERVER['REMOTE_ADDR'];
-		}
-		return $ip;
+		if (!empty($_SERVER['HTTP_CLIENT_IP'])) return $_SERVER['HTTP_CLIENT_IP'];
+		if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) return $_SERVER['HTTP_X_FORWARDED_FOR'];
+		return $_SERVER['REMOTE_ADDR'];
+	}
+}
+if(!function_exists('hash_available')) {
+	function hash_available($hash) {
+		$algos = hash_algos();
+		if(in_array(strtolower($hash), $algos)) return true;
+		return false;
 	}
 }
