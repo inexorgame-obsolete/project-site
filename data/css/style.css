@@ -33,6 +33,10 @@ input, textarea {
 	border: 1px solid #CCC;
 	font-size: 15px;
 }
+input[type=text], textarea, input[type=password] {
+	font-size: 17px;
+	border-radius: 3px;
+}
 input[type=password] {
 	letter-spacing: 3px;
 }
@@ -265,6 +269,30 @@ header .title {
 	margin: 0;
 	padding: 0;
 }
+/* Forms */
+
+form.large label {
+    padding-right: 5px;
+    display: inline-block;
+    width: 30%;
+    clear:both;
+    text-align: right;
+}
+form.large > * > * {
+    max-width: 70%;
+}
+form.large .input {
+	margin-bottom: 10px;
+    max-width: none;
+}
+form.large .centered {
+	margin-left: 30%;
+	margin-left: calc( 30% + 7px );
+}
+textarea {
+    vertical-align: top;
+}
+
 /* Footer */
 footer {
 	display: block;

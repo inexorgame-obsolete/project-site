@@ -7,6 +7,7 @@ class Config_validations {
 	public function __construct($validate = false) 
 	{
 		$this->_CI =& get_instance();
+		$this->_CI->load->helper('url');
 
 		if(is_array($validate))
 		{
@@ -38,7 +39,7 @@ class Config_validations {
 
 
 		if($config['location']['internal'] === FALSE) $config['location']['internal'] = FCPATH;
-		if($config['location']['external'] === FALSE) $config['location']['external'] = base_url();
+		if($config['location']['external'] === FALSE) $config['location']['external'] = site_url();
 
 		$this->_CI->config->set_item('data', $config);
 	}

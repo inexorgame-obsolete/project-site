@@ -1,5 +1,5 @@
 	</div>
-<footer>
+<footer class="clear">
 	<div class="content">
 		<section>
 			<div class="inner">
