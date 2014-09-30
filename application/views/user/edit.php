@@ -33,12 +33,8 @@
 				<?=p_r(form_input($edit_form['username']));?>
 			</div>
 			<div class="user-edit-item">
-				<?=form_label('First name', $edit_form['first_name']['id']);?>
-				<?=p_r(form_input($edit_form['first_name']));?>
-			</div>
-			<div class="user-edit-item">
-				<?=form_label('Last name', $edit_form['last_name']['id']);?>
-				<?=p_r(form_input($edit_form['last_name']));?>
+				<?=form_label('Ingame name', $edit_form['ingame_name']['id']);?>
+				<?=p_r(form_input($edit_form['ingame_name']));?>
 			</div>
 			<div class="user-edit-item">
 				<?=form_label('New Password', $edit_form['password']['id']);?>

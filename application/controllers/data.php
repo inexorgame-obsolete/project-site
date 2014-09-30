@@ -27,7 +27,7 @@ class Data extends CI_Controller {
 		if(!$ownerid || $ownerid == $this->user->id) {
 			$this->owner = $this->user;
 		} else {
-			$this->owner = $this->auth->user($ownerid)->row();
+			$this->owner = $this->auth->user($ownerid);
 		}
 		if(!$command)
 		{

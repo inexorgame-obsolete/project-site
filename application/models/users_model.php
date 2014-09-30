@@ -24,6 +24,13 @@ class Users_model extends CI_Model {
 		return $query->row();
 	}
 
+	public function update_user($id, $data, $password_is_hashed = FALSE) {
+		if(!$password_is_hashed && isset($data['password'])) $data['password'] = $this->real_hash_password($id, $data['password']);
+		$this->db->where('id', $id);
+		$this->db->update($this->_table, $data);
+		return true;
+	}
+
 	public function users_like($name, $columns = array('username', 'ingame_name'), $limit = NULL, $offset = NULL, $start = true, $end = true, $order = 'ASC', $by = 'username') {
 		if(is_array($name)) {
 			if(isset($name['columns']) && is_array($name['columns']))           $columns = $name['columns']; 
@@ -89,6 +96,12 @@ class Users_model extends CI_Model {
 		return false;
 	}
 
+	public function ingame_name_exists($name) {
+		$this->db->where('ingame_name', $name);
+		if($this->db->get($this->_table)->num_rows() > 0) return true;
+		return false;
+	}
+
 	public function create($email, $username, $ingame_name, $password, $register_ip, $country_code, $active) {
 		// The username should be validated before.
 		// Because of security-reasons it will be checked here as well.
@@ -139,6 +152,25 @@ class Users_model extends CI_Model {
 		return false;
 	}
 
+	public function check_password_id($id, $password, $active = TRUE)
+	{
+		$this->db->where('id', $id);
+		$u = $this->db->get($this->_table)->row();
+		if(!$u) return false;
+		if($u->active == false && $active == true) return 0;
+		if($u->password == $this->hash_password($u->unique_id, $password))
+		{
+			return true;
+		}
+		return false;
+	}
+
+	public function real_hash_password($id, $password) {
+		$user = $this->user($id);
+		if(!$user) return false;
+		return $this->hash_password($user->unique_id, $password);
+	}
+
 	public function hash_password($salt, $password) {
 		$hashes = hash_algos();
 		$alogs = array();
@@ -153,8 +185,14 @@ class Users_model extends CI_Model {
 	
 	public function max_username_length() {
 		$fielddata = $this->db->field_data($this->_table);
-		foreach($fielddata as $f) { if($f->name == 'username') { $return = $f->max_length; break; }}
-		return (int) $return;
+		foreach($fielddata as $f) { if($f->name == 'username') { return (int) $f->max_length; }}
+		return false;
+	}
+
+	public function max_ingame_name_length() {
+		$fielddata = $this->db->field_data($this->_table);
+		foreach($fielddata as $f) { if($f->name == 'ingame_name') { return (int) $f->max_length; }}
+		return false;
 	}
 
 }

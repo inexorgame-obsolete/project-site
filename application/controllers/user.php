@@ -124,11 +124,7 @@ class User extends CI_Controller {
 	}
 
 	function edit($slug = false, $value = false, $ajax = false) {
-		show_404();
-		return;
-
-		// Currently disabled.
-		$user = $this->auth->user()->row();
+		$user = $this->auth->user();
 		if($user == false) {
 			redirect('user/register');
 			return;
@@ -179,6 +175,13 @@ class User extends CI_Controller {
 				'autocomplete' => 'off',
 				'name' => 'username',
 				'id' => 'edit_username'
+			);
+			$data['edit_form']['ingame_name'] = array(
+				'type' => 'text',
+				'value' => $user->ingame_name,
+				'autocomplete' => 'off',
+				'name' => 'ingame_name',
+				'id' => 'edit_ingame_name'
 			);
 			$data['edit_form']['email'] = array(
 				'type' => 'email',
@@ -249,23 +252,23 @@ class User extends CI_Controller {
 
 			if($this->input->post('submit'))
 			{
+				$this->config->load('auth');
 				$error = array();
 				$username 				= $this->input->post($data['edit_form']['username']['name']);
 				$password				= $this->input->post($data['edit_form']['password']['name']);
 				$password_verification 	= $this->input->post($data['edit_form']['password_verification']['name']);
 				$about 					= $this->input->post($data['edit_form']['about']['name']);
-				$auth_config			= $this->config->item('auth');
+				$ingame_name 			= $this->input->post($data['edit_form']['ingame_name']['name']);
 
 				$data['edit_form']['username']['value'] 	= $username;
 				$data['edit_form']['about']['value'] 		= $about;
-				if($this->ion_auth->hash_password_db($user->id, $this->input->post($data['edit_form']['old_password']['name']))) {
-
-					if($this->ion_auth->username_check($username) && $user->username != $username) {
+				if($this->auth->check_password_id($user->id, $this->input->post($data['edit_form']['old_password']['name']))) {
+					if($this->auth->user_exists($username) && $user->username != $username) {
 						$error[] = 'The username already exists.';
 						unset($username);
 					}
-					if(strlen($username) > $ion_auth_config['max_username_length']) {
-						$error[] = 'The username is too long. The username may contain ' . $this->config->item('ion_auth')['max_username_length'] . ' characters.';
+					if(strlen($username) > $this->auth->max_username_length()) {
+						$error[] = 'The username is too long. The username may contain ' . $this->auth->max_username_length() . ' characters.';
 						unset($username);
 					}
 					if(isset($username)) {
@@ -276,15 +279,23 @@ class User extends CI_Controller {
 						$error[] = 'The new password does not match with the verification.';
 						$pwerror = true;
 					}
-					if(strlen($password) > 0 && strlen($password) < $ion_auth_config['min_password_length'] || strlen($password) > $ion_auth_config['max_password_length'] && strlen($password) != 0) {
-						$error[] = 'The password is is too long or too short. It must contain between ' . $ion_auth_config['min_password_length'] . ' and ' . $ion_auth_config['max_password_length'] . ' characters.';
+					if(strlen($password) == 0 && strlen($password_verification) == 0) {
+						$pwerror = true;
+					} elseif(strlen($password) < $this->config->item('password_min_length')) {
+						$error[] = 'The password is is too short. It must contain at least ' . $this->config->item('password_min_length') . ' characters.';
 						$pwerror = true;
 					}
+					if(strlen(str_replace(' ', '', $ingame_name)) === 0) $ingame_name = NULL;
+					if(strlen($ingame_name) > $this->auth->max_ingame_name_length()) {
+						$error[] = 'The ingame-name is too long. The ingame_name may contain ' . $this->auth->max_ingame_name_length() . ' characters.';
+					} elseif($this->auth->ingame_name_exists($ingame_name) && $user->ingame_name != $ingame_name) {
+						$error[] = 'The ingame-name already exists. Please choose another one.';
+					} else {
+						$update_data['ingame_name'] = $ingame_name;
+					}
 					if($pwerror != true) $update_data['password'] = $password;
-					$update_data['first_name'] 	= $first_name;
-					$update_data['last_name'] 	= $last_name;
-					$update_data['about']		= $about;
-					$this->ion_auth->update($user->id, $update_data);
+					$update_data['about'] = $about;
+					$this->auth->update_user($user->id, $update_data);
 					$data['form_validation'] = array('success' => TRUE);
 					if(count($error) > 0) {
 						$data['form_validation']['errors'] = TRUE;

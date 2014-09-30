@@ -23,6 +23,16 @@ class Auth
 
 	}
 
+	public function __call($method, $arguments)
+	{
+		if (!method_exists( $this->_CI->users_model, $method) )
+		{
+			throw new Exception('Undefined method Auth::' . $method . '() called');
+		}
+
+		return call_user_func_array(array($this->_CI->users_model, $method), $arguments);
+	}
+
 	public function login($username, $password, $stay_logged_in = false) {
 		if(strpos($username, "@") !== false) {
 			// checks email, not username

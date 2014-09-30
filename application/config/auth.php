@@ -18,7 +18,7 @@ $config['error_messages'] = array(
 	'username_regex_disallowed_chars'	=> 'The chars %s are not allowed.',																// %s = disallowed chars (with "and" before last char)
 	'username_too_short'				=> 'The username is too short. It have to be between %s and %s characters long.',				// 1st %s = username min-length; 2nd %s = username max length
 	'username_too_long'					=> 'The username is too long. It should not exceed %s characters and should have at least %s',	// 1st %s = username max length; 2nd %s = username max length'
-	'password_too_short'				=> 'The password should have at least %s characters.',											// %s = password min-length
+	'password_too_short'				=> 'The password should at least have %s characters.',											// %s = password min-length
 	'passwords_do_not_match'			=> 'The password you submitted does not match your verification.',
 	'wrong_captcha'						=> 'The captcha you submitted is wrong.'
 );
