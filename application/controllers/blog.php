@@ -5,7 +5,6 @@ class Blog extends CI_Controller {
 		parent::__construct();
 		$this->load->library('Config_validations', array('data'));
 
-		$this->load->model('subgroup_model');
 		$this->load->model('blog_model');
 		$this->load->database();
 		$this->load->config('blog');
@@ -29,16 +28,9 @@ class Blog extends CI_Controller {
 		if($user) {
 			$this->permissions->set_user($user->id);
 		}
-		if($user == false)
-		{
-			$permissions = false;
-		} else {
-			$permissions = $this->subgroup_model;
-			$permissions->set_user($user->id);
-			$permissions->set_parent('blog_entry_creator');
-		}
+		$permissions = $this->permissions->has_user_permission('blog');
 
-		$posts = $this->blog_model->get_posts_for_user($user ? $user->id : false, 10, $start, $permissions ? $permissions->user_in_subgroup('release_entry') : false);
+		$posts = $this->blog_model->get_posts_for_user($user ? $user->id : false, 10, $start, $this->permissions->has_user_permission('blog_publish_all'));
 		for($i = 0; $i < count($posts); $i++)
 		{
 			$posts[$i]['body'] = unserialize($posts[$i]['body']);
@@ -49,14 +41,14 @@ class Blog extends CI_Controller {
 		$data = array(
 			'posts' 			=> $posts, 
 			'creators' 			=> $creators,
-			'max_pagination'	=> $this->blog_model->max_pagination(10, $user ? $user->id : false, $permissions ? $permissions->user_in_subgroup('release_entry') : false),
+			'max_pagination'	=> $this->blog_model->max_pagination(10, $user ? $user->id : false, $this->permissions->has_user_permission('blog_publish_all')),
 			'current_page'		=> $site + 1
 		);
 
 		$data['user_may_release'] = false;
 		$data['user_edit_others'] = false;
-		if($permissions && $permissions->user_in_subgroup('release_entry')) $data['user_may_release'] = true;
-		if($permissions && $permissions->user_in_subgroup('edit_others')) $data['user_edit_others'] = true;
+		if($permissions && $this->permissions->has_user_permission('blog_publish_all')) $data['user_may_release'] = true;
+		if($permissions && $this->permissions->has_user_permission('blog_edit_all')) $data['user_edit_others'] = true;
 		$this->load->view('blog/blog', $data);
 	}
 
@@ -72,9 +64,8 @@ class Blog extends CI_Controller {
 		{
 			$permissions = false;
 		} else {
-			$permissions = $this->subgroup_model;
-			$permissions->set_user($user->id);
-			$permissions->set_parent('blog_entry_creator');
+			$this->permissions->set_user($user->id);
+			$permissions = $this->permissions->has_user_permission('blog_create');
 		}
 
 		$access = false;
@@ -89,7 +80,7 @@ class Blog extends CI_Controller {
 			return;
 		}
 		$entry->body = unserialize($entry->body);
-		if((isset($user) && $permissions && ($user->id == $entry->user_id || $permissions->user_in_subgroup('release_entry'))) || $entry->public == true) $access = true;
+		if((isset($user) && $permissions && ($user->id == $entry->user_id || $this->permissions->has_user_permission('blog_publish_all'))) || $entry->public == true) $access = true;
 		else { $this->template->render_permission_error(); return; }
 		$data['entry'] = $entry;
 		$data['creator'] = $this->auth->user($entry->user_id);
@@ -97,8 +88,8 @@ class Blog extends CI_Controller {
 
 		$data['user_may_release'] = false;
 		$data['user_edit_others'] = false;
-		if($permissions && $permissions->user_in_subgroup('release_entry')) $data['user_may_release'] = true;
-		if($permissions && $permissions->user_in_subgroup('edit_others')) $data['user_edit_others'] = true;
+		if($permissions && $this->permissions->has_user_permission('blog_publish')) $data['user_may_release'] = true;
+		if($permissions && $this->permissions->has_user_permission('blog_edit_all')) $data['user_edit_others'] = true;
 
 		$this->load->view('blog/view', $data);
 	}
