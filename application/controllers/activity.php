@@ -28,6 +28,7 @@ class Activity extends CI_Controller {
 		$may_submit = FALSE;
 		$user = $this->auth->user();
 		$data['user'] = $user;
+		$see_all_posts = false;
 		if($user) {
 			$this->permissions->set_user($user->id);
 			$see_all_posts = $this->permissions->has_user_permission('activity_log');
