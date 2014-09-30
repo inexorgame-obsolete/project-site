@@ -1,4 +1,11 @@
-
+<?php
+	function get_youtube_links($message) {
+		// youtube regex /(?:(?:http?s:)?(?:\/\/)?(?:www\.)?youtu(?:be\.com\/watch(?:.\W*v\=)|\.be\/)([^&\n\t\f\s\r]*))/i
+		$youtube_regex = '/(?:(?:http?s:)?(?:\/\/)?(?:www\.)?youtu(?:be\.com\/watch(?:.\W*v\=)|\.be\/)([^&\n\t\f\s\r]*))/i';
+		preg_match_all($youtube_regex, $message, $matches);
+		return $matches[1];
+	}
+?>
 <div class="centered">
 	<h1 class="text-contrast in-eyecatcher">Activity Log</h1>
 	<?php if($may_submit) : ?>
@@ -21,12 +28,17 @@
 			<h4>There is no activity right now.</h4>
 		</div>
 	<?php endif; ?>
-	<?php foreach($posts as $p): ?>
+	<?php foreach($posts as $p): $youtube = get_youtube_links($p['changes']); ?>
 		<div class="spotlight">
-			<a href="<?=base_url();?>user/<?=$p['user']->id?>" class="fixed"><div class="avatar" style="background-image:url(<?=avatar_image($p['user']->id)?>);"></div><?=showname($p['user'])?><span class="date" title="<?=tm($p['timestamp'])?>"><?=dt($p['timestamp'])?></span></a>
+			<a href="<?=base_url();?>user/<?=$p['user']->id?>" class="full"><div class="avatar" style="background-image:url(<?=avatar_image($p['user']->id)?>);"></div><?=showname($p['user'], 'user one-line')?><span class="date" title="<?=tm($p['timestamp'])?>"><?=dt($p['timestamp'])?></span></a>
 			<div class="topics">
 				<?=$p['changes']?>
 			</div>
+			<?php foreach($youtube as $y) : ?>
+				<div class="youtube-container">
+					<iframe width="100%" height="315" src="//www.youtube-nocookie.com/embed/<?=$y?>" frameborder="0" allowfullscreen></iframe>
+				</div>
+			<?php endforeach; ?>
 		</div>
 
 	<?php endforeach; ?>

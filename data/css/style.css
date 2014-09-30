@@ -917,6 +917,9 @@ input.create-post {
 	padding-left: 60px;
 	display: inline-block;
 }
+.spotlight .user.one-line {
+	margin-right: -55px;
+}
 
 /* Blog entries */
 
