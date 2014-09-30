@@ -1,0 +1,87 @@
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+class Cronjobs extends CI_Controller {
+	private $_cronjobdir = 'application/libraries/cronjobs/';
+	public function __construct() {
+		parent::__construct();
+		if(!$this->input->is_cli_request()) 
+		{
+			show_404();
+			die(); // for safety reasons if show_404() won't work as expected or properly.
+		}
+	}
+
+	public function index($group, $methods)
+	{
+		if(!is_dir(FCPATH . $this->_cronjobdir . $group . '/')) return false;
+		$cronjobs = scandir(FCPATH . $this->_cronjobdir . $group . '/');
+		foreach($cronjobs as $cronjob)
+		{
+			if(substr($cronjob, strlen($cronjob) - 4) == '.php')
+			{
+				$loadlib = explode('/', $this->_load_if_exists($group . '/' . $cronjob));
+				$loadlib = $loadlib[count($loadlib)-1];
+				if(is_callable(array($this->$loadlib, 'on_group'))) {
+					call_user_func_array(array($this->$loadlib, 'on_group_call'), array());
+				}
+				foreach($methods as $method) {
+					if(is_callable(array($this->$loadlib, $method))) {
+						call_user_func_array(array($this->$loadlib, $method), array());
+					}
+				}
+			}
+		}
+		return true;
+	}
+
+	public function file($file, $methods)
+	{
+		$loadlib = $this->_load_if_exists($file . '.php');
+		if(!$loadlib) return false;
+
+		if(count($methods) == 0) {
+			$methods[0] = 'on_function_call';
+		}
+		foreach($methods as $k => $method) {
+			if(is_callable(array($this->$loadlib, $method))) {
+				call_user_func_array(array($this->$loadlib, $method), array());
+			}
+		}
+	}
+
+	public function filemethod($file, $method, $params) 
+	{
+
+		$loadlib = $this->_load_if_exists($file . '.php');
+		if(!$loadlib) return false;
+
+		if(is_callable(array($this->$loadlib, $method))) {
+			return call_user_func_array(array($this->$loadlib, $method), $params);
+		}	
+	}
+
+	public function _remap($method, $params = array())
+	{
+		if($method == 'file')
+		{
+			$file = $params[0];
+			unset($params[0]);
+			return call_user_func_array(array($this, 'file'), array($file, $params));
+		} elseif($method == 'filemethod') {
+			$file = $params[0];
+			unset($params[0]);
+			$method = $params[1];
+			unset($params[1]);
+			return call_user_func_array(array($this, 'filemethod'), array($file, $method, $params));
+		} else {
+			if($method == 'index') $method = 'default_group';
+			return call_user_func_array(array($this, 'index'), array($method, $params));
+		}
+	}
+
+	private function _load_if_exists($file) {
+		if(!file_exists(FCPATH . $this->_cronjobdir . $file)) return false;
+		$loadlib = substr($file, 0, strlen($file) - 4);
+		$this->load->library('cronjobs/' . $loadlib);
+		return $loadlib;
+	}
+}
