@@ -43,7 +43,6 @@ $route['team'] = "pages/view/team";
 $route['auth/(:any)'] = 'auth/$1';
 $route['auth'] = 'auth';
 
-$route['user/edit/(:num)'] = 'auth/edit_user/$1';
 $route['user/(:any)'] = 'user/$1';
 $route['user'] = 'user';
 
