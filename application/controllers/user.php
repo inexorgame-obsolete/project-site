@@ -13,6 +13,7 @@ class User extends CI_Controller {
 		$this->load->helper('captcha');
 		$this->load->library('fileinfo');
 		$this->load->library('auth');
+		$this->load->library('permissions');
 		$this->load->library('reCaptcha');
 		$this->load->library('template');
 	}
@@ -38,7 +39,7 @@ class User extends CI_Controller {
 		$data['errors'] = false;
 		if(isset($_POST['submit'])) {
 			if($this->auth->login($_POST['username_email'], $_POST['password'], isset($_POST['stay_logged_in']))) {
-
+				redirect('/user/');
 			} else {
 				$data['errors'] = array('Your password does not match to your e-mail or username.');
 			}
@@ -111,6 +112,7 @@ class User extends CI_Controller {
 		if(!is_object($view))
 		{
 			show_404();
+			return;
 		}
 		$unsets = array('password', 'salt', 'forgotten_password_code', 'forgotten_password_time', 'remember_code');
 		$user = (array) $user;
@@ -130,7 +132,7 @@ class User extends CI_Controller {
 			return;
 		}
 		if($slug == 'picture') {
-			if(strtolower($value) == 'profile') $value = 'avatar';
+			if(strtolower($value) == 'profile' || strtolower($value) == 'avatar') $value = 'avatar';
 			else $value = 'background';
 
 			if($this->input->post('delete')) {
@@ -138,7 +140,7 @@ class User extends CI_Controller {
 				if(file_exists(FCPATH . 'data/users/' . $value . '/' . $user->id . '.jpg')) unlink(FCPATH . 'data/users/' . $value . '/' . $user->id . '.jpg');
 				$returnarray = array("success" => true, "action" => "delete", "type" => $value);
 				if($value == 'avatar') $returnarray["path"] = base_url() . 'data/users/avatar/no-avatar.png';
-				if($value == 'background') $returnarray["path"] = base_url() . 'data/users/images/eyecatcher.png';
+				if($value == 'background') $returnarray["path"] = base_url() . 'data/images/eyecatcher.png';
 			} else {
 				if(isset($_FILES['picture'])) {
 					$this->fileinfo->filepath = $_FILES['picture']['tmp_name'];
@@ -166,140 +168,114 @@ class User extends CI_Controller {
 				redirect('user/edit');
 			}
 		} 
-		if($ajax != true) {
-			$user = $this->auth->user();
+
+		if(isint($slug)) {
+			$this->permissions->set_user($user->id);
+			if(!$this->permissions->has_user_permission('edit_others_profile'))
+			{
+				$this->template->render_permission_error();
+				return;
+			}
+			$edit_user = $this->auth->user($slug);
+
+			if($value == 'profile_picture') {
+				if($this->input->post('delete') && $this->permissions->has_user_permission('delete_others_profile_picture')) {
+					$returnarray = array("success" => true, "action" => "delete", "type" => 'profile');
+					if(file_exists(FCPATH . 'data/users/avatar/' . $edit_user->id . '.png')) unlink(FCPATH . 'data/users/avatar/' . $edit_user->id . '.png');
+					if(file_exists(FCPATH . 'data/users/avatar/' . $edit_user->id . '.jpg')) unlink(FCPATH . 'data/users/avatar/' . $edit_user->id . '.jpg');
+					$returnarray = array("success" => true, "action" => "delete", "type" => 'avatar');
+					$returnarray["path"] = base_url() . 'data/users/avatar/no-avatar.png';
+				} else {
+					$returnarray = array("success" => false, "error" => "You have no permissions to remove the avatar-image.");
+				}
+
+				if($ajax) {
+					$this->template->disable();
+					$this->output->set_content_type('application/json')->set_output(json_encode($returnarray));
+				} else {
+					redirect('user/edit/' . $edit_user->id);
+				}
+				return;
+			} elseif($value == 'background_picture') {
+				if($this->input->post('delete') && $this->permissions->has_user_permission('delete_others_background_picture')) {
+					$returnarray = array("success" => true, "action" => "delete", "type" => 'background');
+					if(file_exists(FCPATH . 'data/users/avatar/' . $edit_user->id . '.png')) unlink(FCPATH . 'data/users/avatar/' . $edit_user->id . '.png');
+					if(file_exists(FCPATH . 'data/users/avatar/' . $edit_user->id . '.jpg')) unlink(FCPATH . 'data/users/avatar/' . $edit_user->id . '.jpg');
+					$returnarray = array("success" => true, "action" => "delete", "type" => 'avatar');
+					$returnarray["path"] = base_url() . 'data/users/images/eyecatcher.png';
+				} else {
+					$returnarray = array("success" => false, "error" => "You have no permissions to remove the background-image.");
+				}
+
+				if($ajax) {
+					$this->template->disable();
+					$this->output->set_content_type('application/json')->set_output(json_encode($returnarray));
+				} else {
+					redirect('user/edit/' . $edit_user->id);
+				}
+				return;
+			}
+
+			$permissions_array = $this->permissions->has_user_permissions(array(
+				'edit_others_email',
+				'edit_others_username',
+				'edit_others_ingame_name',
+				'edit_others_about',
+				'edit_others_password',
+				'delete_others_profile_picture',
+				'delete_others_background_picture'
+			), true);
+			$this->_get_edit_others_data($data, $edit_user, $permissions_array);
+
+			if(isset($_POST['submit'])) {
+				$update_data = array();
+				$validate_array = array();
+				$this->_update_if_allowed($update_data, $data['edit_form']['username'], 'username', $validate_array);
+				$this->_update_if_allowed($update_data, $data['edit_form']['password'], 'password', $validate_array);
+				$this->_update_if_allowed($update_data, $data['edit_form']['password_verification'], 'password_verification', $validate_array);
+				$this->_update_if_allowed($update_data, $data['edit_form']['email'], 'email', $validate_array);
+				$this->_update_if_allowed($update_data, $data['edit_form']['about'], 'about', $validate_array);
+				$this->_update_if_allowed($update_data, $data['edit_form']['ingame_name'], 'ingame_name', $validate_array);
+
+				$errors = $this->auth->update_user($update_data, $edit_user->id, $validate_array);
+
+				$edit_user = $this->auth->user($edit_user->id);
+				$this->_get_edit_others_data($data, $edit_user, $permissions_array);
+				$data['errors'] = $errors;
+			}
+
+			$data['edit_user'] = $edit_user;
+			$this->_render_page('user/edit_others', $data);
+
+		
+
+		} elseif($ajax != true) {
 			$data['user'] = $user;
-			$data['edit_form']['username'] = array(
-				'type' => 'text',
-				'value' => $user->username,
-				'autocomplete' => 'off',
-				'name' => 'username',
-				'id' => 'edit_username'
-			);
-			$data['edit_form']['ingame_name'] = array(
-				'type' => 'text',
-				'value' => $user->ingame_name,
-				'autocomplete' => 'off',
-				'name' => 'ingame_name',
-				'id' => 'edit_ingame_name'
-			);
-			$data['edit_form']['email'] = array(
-				'type' => 'email',
-				'value' => $user->email,
-				'autocomplete' => 'off',
-				'name' => 'email',
-				'id' => 'edit_email'
-			);
-			$data['edit_form']['password'] = array(
-				'type' => 'password',
-				'autocomplete' => 'off',
-				'name' => 'password',
-				'id' => 'password'
-			);
-			$data['edit_form']['password_verification'] = array(
-				'type' => 'password',
-				'autocomplete' => 'off',
-				'name' => 'password_verification',
-				'id' => 'password_verification',
-				'placeholder' => 'Verification'
-			);
-			$data['edit_form']['old_password'] = array(
-				'type' => 'password',
-				'autocomplete' => 'off',
-				'name' => 'old_password',
-				'id' => 'old_password'
-			);
-			$data['edit_form']['about'] = array(
-				'value' => $user->about,
-				'autocomplete' => 'off',
-				'name' => 'about',
-				'id' => 'edit_about',
-				'class' => 'about'
-				);
-			$data['edit_form']['submit'] = array(
-				'value' => "Update information",
-				'name' => 'submit',
-				'type' => 'submit'
-				);
-			$data['change_picture']['profile']['upload'] = array(
-				'type' => 'file',
-				'name' => 'picture',
-				);
-			$data['change_picture']['profile']['submit'] = array(
-				'type' => 'submit',
-				'name' => 'submit',
-				'value' => 'Change profile-picture'
-				);
-			$data['change_picture']['profile']['delete'] = array(
-				'type' => 'submit',
-				'name' => 'delete',
-				'value' => 'Delete profile-picture'
-				);
-			$data['change_picture']['background']['upload'] = array(
-				'type' => 'file',
-				'name' => 'picture',
-				);
-			$data['change_picture']['background']['submit'] = array(
-				'type' => 'submit',
-				'name' => 'submit',
-				'value' => 'Change background-picture'
-				);
-			$data['change_picture']['background']['delete'] = array(
-				'type' => 'submit',
-				'name' => 'delete',
-				'value' => 'Delete background-picture'
-				);
+			$this->_get_edit_data($data, $user);
 
 			if($this->input->post('submit'))
 			{
 				$this->config->load('auth');
 				$error = array();
-				$username 				= $this->input->post($data['edit_form']['username']['name']);
-				$password				= $this->input->post($data['edit_form']['password']['name']);
-				$password_verification 	= $this->input->post($data['edit_form']['password_verification']['name']);
-				$about 					= $this->input->post($data['edit_form']['about']['name']);
-				$ingame_name 			= $this->input->post($data['edit_form']['ingame_name']['name']);
+				$update_data['username']				= $this->input->post($data['edit_form']['username']['name']);
+				$update_data['password']				= $this->input->post($data['edit_form']['password']['name']);
+				$update_data['password_verification'] 	= $this->input->post($data['edit_form']['password_verification']['name']);
+				$update_data['about']					= $this->input->post($data['edit_form']['about']['name']);
+				$update_data['ingame_name']				= $this->input->post($data['edit_form']['ingame_name']['name']);
 
-				$data['edit_form']['username']['value'] 	= $username;
-				$data['edit_form']['about']['value'] 		= $about;
+				$data['edit_form']['username']['value'] 	= $update_data['username'];
+				$data['edit_form']['about']['value'] 		= $update_data['about'];
+
+				if(strlen($update_data['password_verification']) == 0) 	unset($update_data['password']);
+				if($update_data['username']    == $user->username) 		unset($update_data['username']);
+				if($update_data['ingame_name'] == $user->ingame_name) 		unset($update_data['ingame_name']);
+
 				if($this->auth->check_password_id($user->id, $this->input->post($data['edit_form']['old_password']['name']))) {
-					if($this->auth->user_exists($username) && $user->username != $username) {
-						$error[] = 'The username already exists.';
-						unset($username);
-					}
-					if(strlen($username) > $this->auth->max_username_length()) {
-						$error[] = 'The username is too long. The username may contain ' . $this->auth->max_username_length() . ' characters.';
-						unset($username);
-					}
-					if(isset($username)) {
-						$update_data['username'] = $username;
-					}
-					$pwerror = false;
-					if($password != $password_verification) {
-						$error[] = 'The new password does not match with the verification.';
-						$pwerror = true;
-					}
-					if(strlen($password) == 0 && strlen($password_verification) == 0) {
-						$pwerror = true;
-					} elseif(strlen($password) < $this->config->item('password_min_length')) {
-						$error[] = 'The password is is too short. It must contain at least ' . $this->config->item('password_min_length') . ' characters.';
-						$pwerror = true;
-					}
-					if(strlen(str_replace(' ', '', $ingame_name)) === 0) $ingame_name = NULL;
-					if(strlen($ingame_name) > $this->auth->max_ingame_name_length()) {
-						$error[] = 'The ingame-name is too long. The ingame_name may contain ' . $this->auth->max_ingame_name_length() . ' characters.';
-					} elseif($this->auth->ingame_name_exists($ingame_name) && $user->ingame_name != $ingame_name) {
-						$error[] = 'The ingame-name already exists. Please choose another one.';
-					} else {
-						$update_data['ingame_name'] = $ingame_name;
-					}
-					if($pwerror != true) $update_data['password'] = $password;
-					$update_data['about'] = $about;
-					$this->auth->update_user($user->id, $update_data);
+					$errors = $this->auth->update_user($update_data);
 					$data['form_validation'] = array('success' => TRUE);
-					if(count($error) > 0) {
+					if($errors['count'] > 0) {
 						$data['form_validation']['errors'] = TRUE;
-						$data['form_validation']['messages'] = $error;
+						$data['form_validation']['messages'] = $errors['messages'];
 					} else {
 						$data['form_validation']['messages'] = array('Successfully updated. Reload to see full changes.');
 					}
@@ -383,7 +359,7 @@ class User extends CI_Controller {
 		{
 			return call_user_func_array(array($this, $method), $params);
 		} 
-		elseif((string) (int) $method == $method)
+		elseif(isint($method))
 		{
 			$params['id'] = $method;
 			return call_user_func_array(array($this, 'view'), $params);
@@ -393,5 +369,177 @@ class User extends CI_Controller {
 			$params['string'] = $method;
 			return call_user_func_array(array($this, 'search'), $params);
 		}
+	}
+
+	private function _get_edit_data(&$data, $user) {
+		$data['edit_form']['username'] = array(
+			'type' => 'text',
+			'value' => $user->username,
+			'autocomplete' => 'off',
+			'name' => 'username',
+			'id' => 'edit_username'
+		);
+		$data['edit_form']['ingame_name'] = array(
+			'type' => 'text',
+			'value' => $user->ingame_name,
+			'autocomplete' => 'off',
+			'name' => 'ingame_name',
+			'id' => 'edit_ingame_name'
+		);
+		$data['edit_form']['email'] = array(
+			'type' => 'email',
+			'value' => $user->email,
+			'autocomplete' => 'off',
+			'name' => 'email',
+			'id' => 'edit_email'
+		);
+		$data['edit_form']['password'] = array(
+			'type' => 'password',
+			'autocomplete' => 'off',
+			'name' => 'password',
+			'id' => 'password'
+		);
+		$data['edit_form']['password_verification'] = array(
+			'type' => 'password',
+			'autocomplete' => 'off',
+			'name' => 'password_verification',
+			'id' => 'password_verification',
+			'placeholder' => 'Verification'
+		);
+		$data['edit_form']['old_password'] = array(
+			'type' => 'password',
+			'autocomplete' => 'off',
+			'name' => 'old_password',
+			'id' => 'old_password'
+		);
+		$data['edit_form']['about'] = array(
+			'value' => $user->about,
+			'autocomplete' => 'off',
+			'name' => 'about',
+			'id' => 'edit_about',
+			'class' => 'about'
+			);
+		$data['edit_form']['submit'] = array(
+			'value' => "Update information",
+			'name' => 'submit',
+			'type' => 'submit'
+			);
+		$data['change_picture']['profile']['upload'] = array(
+			'type' => 'file',
+			'name' => 'picture',
+			);
+		$data['change_picture']['profile']['submit'] = array(
+			'type' => 'submit',
+			'name' => 'submit',
+			'value' => 'Change profile-picture'
+			);
+		$data['change_picture']['profile']['delete'] = array(
+			'type' => 'submit',
+			'name' => 'delete',
+			'value' => 'Delete profile-picture'
+			);
+		$data['change_picture']['background']['upload'] = array(
+			'type' => 'file',
+			'name' => 'picture',
+			);
+		$data['change_picture']['background']['submit'] = array(
+			'type' => 'submit',
+			'name' => 'submit',
+			'value' => 'Change background-picture'
+			);
+		$data['change_picture']['background']['delete'] = array(
+			'type' => 'submit',
+			'name' => 'delete',
+			'value' => 'Delete background-picture'
+		);
+	}
+
+	private function _get_edit_others_data(&$data, $user, $permissions) {
+		$data['edit_form']['email'] = array(
+			'type' => 'text',
+			'value' => $user->email,
+			'autocomplete' => 'off',
+			'name' => 'email',
+			'id' => 'edit_email'
+		);
+		if(!$permissions['edit_others_email']) $this->_add_disabled($data['edit_form']['email']);
+
+		$data['edit_form']['username'] = array(
+			'type' => 'text',
+			'value' => $user->username,
+			'autocomplete' => 'off',
+			'name' => 'username',
+			'id' => 'edit_username'
+		);
+		if(!$permissions['edit_others_username']) $this->_add_disabled($data['edit_form']['username']);
+
+		$data['edit_form']['ingame_name'] = array(
+			'type' => 'text',
+			'value' => $user->ingame_name,
+			'autocomplete' => 'off',
+			'name' => 'ingame_name',
+			'id' => 'edit_ingame_name'
+		);
+		if(!$permissions['edit_others_ingame_name']) $this->_add_disabled($data['edit_form']['ingame_name']);
+
+		$data['edit_form']['password'] = array(
+			'type' => 'password',
+			'autocomplete' => 'off',
+			'name' => 'password',
+			'id' => 'password'
+		);
+		$data['edit_form']['password_verification'] = array(
+			'type' => 'password',
+			'autocomplete' => 'off',
+			'name' => 'password_verification',
+			'id' => 'password_verification',
+			'placeholder' => 'Verification'
+		);
+		if(!$permissions['edit_others_password']) { 
+			$this->_add_disabled($data['edit_form']['password']); 
+			$this->_add_disabled($data['edit_form']['password_verification']); 
+		}
+
+		$data['edit_form']['about'] = array(
+			'value' => $user->about,
+			'autocomplete' => 'off',
+			'name' => 'about',
+			'id' => 'edit_about',
+			'class' => 'about'
+		);
+		if(!$permissions['edit_others_about']) { $this->_add_disabled($data['edit_form']['about']); }
+
+		$data['edit_form']['submit'] = array(
+			'value' => "Update information",
+			'name' => 'submit',
+			'type' => 'submit'
+		);
+
+		$data['change_picture']['profile']['delete'] = array(
+			'type' => 'submit',
+			'name' => 'delete',
+			'value' => 'Delete profile-picture'
+		);
+		if(!$permissions['delete_others_profile_picture']) { $this->_add_disabled($data['change_picture']['profile']['delete']); }
+
+		$data['change_picture']['background']['delete'] = array(
+			'type' => 'submit',
+			'name' => 'delete',
+			'value' => 'Delete background-picture'
+		);
+		if(!$permissions['delete_others_background_picture']) { $this->_add_disabled($data['change_picture']['background']['delete']); }
+	}
+	private function _add_disabled(&$data) {
+		$data['disabled'] = 'disabled';
+		$data['title'] = 'You are not allowed to edit this field.';
+	}
+
+	private function _update_if_allowed(&$update, $input, $index, &$validate_array = array()) {
+		if(!isset($input['disabled'])) { 
+			$update[$index] = $this->input->post($input['name']);
+			$validate_array[] = $index;
+			return true; 
+		}
+		return false;
 	}
 }
