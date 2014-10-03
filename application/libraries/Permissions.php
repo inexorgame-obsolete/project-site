@@ -37,11 +37,12 @@ class Permissions {
 			$required_permissions[] = (int) $permission->id;
 
 			// Check if permissions are directly assigned to user
-			foreach($required_permissions as $p) {
+			foreach($required_permissions as $i => $p) {
 				$has_user_permission = $this->_CI->users_permissions_model->has_user_permission($this->_userid, $p);
 				if($has_user_permission === false) return false;
-				elseif($has_user_permission === true) unset($required_permissions[$p]);
+				elseif($has_user_permission === true) unset($required_permissions[$i]);
 			}
+			if(count($required_permissions) == 0) return true;
 
 			// Check if permissions are assigned to group and fit the rules
 			$required_permissions = $this->_CI->pgroups_permissions_model->groupset_have_permissions(
@@ -59,6 +60,18 @@ class Permissions {
 			return true;
 		}
 		return false;
+	}
+
+	public function has_user_permissions($permissions, $return_array = false, $have_only_one = false)
+	{
+		$return = array();
+		foreach($permissions as $p) {
+			$return[$p] = $this->has_user_permission($p);
+			if($return[$p] == false && $have_only_one == false && $return_array == false) return false;
+			elseif($return[$p] == true && $have_only_one == true && $return_array == false) return true;
+		}
+		if($return_array == true) return $return;
+		return true; 
 	}
 
 	public function get_all_parents($id, $parents = false) {
