@@ -6,6 +6,14 @@ class Auth
 	private $_require_email_verification = 0;
 	private $_disallowed_characters;
 	private $_language_and = 'and';
+	private $_editable_user_columns = array(
+		'email',
+		'username',
+		'ingame_name',
+		'password',
+		'about',
+		'country_code'
+	);
 	public function __construct() {
 		$this->_CI =& get_instance();
 		$this->_CI->load->model('users_model');
@@ -16,9 +24,11 @@ class Auth
 		if (substr(CI_VERSION, 0, 1) == '2') $this->_CI->load->library('session');
 		else $this->_CI->load->driver('session');
 
-		$this->_require_email_verification 	= $this->_CI->config->item('require_email_verification');
-		$this->_disallowed_characters 		= $this->_CI->config->item('disallowed_characters');
-		$this->_username_regex 				= $this->_CI->config->item('username_regex');
+		$this->_require_email_verification 		= $this->_CI->config->item('require_email_verification');
+		$this->_username_disallowed_characters 	= $this->_CI->config->item('username_disallowed_characters');
+		$this->_ingame_disallowed_characters 	= $this->_CI->config->item('ingame_disallowed_characters');
+		$this->_username_regex 					= $this->_CI->config->item('username_regex');
+		$this->_ingame_regex 					= $this->_CI->config->item('ingame_name_regex');
 		$this->_stay_logged_in = $this->_CI->config->item('stay_logged_in_time');
 
 	}
@@ -48,57 +58,14 @@ class Auth
 	}
 
 	public function register_user($email, $username, $password, $password_verification = false, $captcha = NULL) {
-		$error_messages = $this->_CI->config->item('error_messages');
-		$hit_disallowed_characters = array();
-		$error = array();
-		if(!valid_email($email)) $error['invalid_email'] = $error_messages['invalid_email'];
-		if(count($this->_CI->users_model->user_by_email($email)) > 0) $error['email_exists'] = sprintf($error_messages['email_exists'], htmlentities($email));
-		if(count($this->_CI->users_model->user_by_username($username)) > 0) $error['username_exists'] = sprintf($error_messages['username_exists'], htmlentities($username));
-		for($i = 0; $i < strlen($username); $i++) {
-			if(in_array($username[$i], $this->_disallowed_characters)) {
-				$hit_disallowed_characters[] = $username[$i];
-			}
-		}
-		$dis_chars_count = count($hit_disallowed_characters);
-		if($dis_chars_count == 1) {
-			$error['username_disallowed_char'] = sprintf($error_messages['username_disallowed_char'], '\'' . $hit_disallowed_characters[0] . '\'');
-		} elseif($dis_chars_count > 1) {
-			$last_dis_char = $hit_disallowed_characters[$dis_chars_count-1];
-			unset($hit_disallowed_characters[$dis_chars_count-1]);
-			$replace = '\'' . implode('\', \'', $hit_disallowed_characters) . '\'';
-			$replace .= ' ' . $this->_language_and . ' \'' . $last_dis_char . '\'';
-			$error['username_disallowed_chars'] = sprintf($error_messages['username_disallowed_chars'], $replace);
-		}
-		$match = preg_match($this->_username_regex, $username, $matches);
-		if(!$match || $matches[0] != $username) {
-			$hit_disallowed_characters = $this->_return_non_matching_characters($this->_username_regex, $username);
-			$dis_chars_count = count($hit_disallowed_characters);
-			if($dis_chars_count == 1) {
-				$error['username_regex_disallowed_char'] = sprintf($error_messages['username_regex_disallowed_char'], '\'' . $hit_disallowed_characters[0] . '\'');
-			} elseif($dis_chars_count > 1) {
-				$last_dis_char = $hit_disallowed_characters[$dis_chars_count-1];
-				unset($hit_disallowed_characters[$dis_chars_count-1]);
-				$replace = '\'' . implode('\', \'', $hit_disallowed_characters) . '\'';
-				$replace .= ' ' . $this->_language_and . ' \'' . $last_dis_char . '\'';
-				$error['username_regex_disallowed_chars'] = sprintf($error_messages['username_regex_disallowed_chars'], $replace);
-			}
-		}
-		$username_max_length = $this->_CI->users_model->max_username_length();
-		if(strlen($username) < $this->_CI->config->item('username_min_length')) {
-			$error['username_too_short'] = sprintf($error_messages['username_too_short'], $this->_CI->config->item('username_min_length'), $username_max_length);
-		}
-		if(strlen($username) > $username_max_length) {
-			$error['username_too_long'] = sprintf($error_messages['username_too_long'], $username_max_length, $this->_CI->config->item('username_min_length'));
-		}
-		if(strlen($password) < $this->_CI->config->item('password_min_length')) {
-			$error['password_too_short'] = sprintf($error_messages['password_min_length'], $this->_CI->config->item('password_min_length'));
-		}
-		if($password_verification !== false && $password_verification != $password) {
-			$error['passwords_do_not_match'] = $error_messages['passwords_do_not_match'];
-		}
-		if($captcha !== null && $captcha != true) {
-			$error['wrong_captcha'] = $error_messages['wrong_captcha'];
-		}
+		
+		$error = $this->_validate_data(array(
+			'email' => $email,
+			'username' => $username,
+			'password' => $password,
+			'password_verification' => $password_verification,
+			'captcha' => $captcha
+		))['messages'];
 
 
 		if(count($error) > 0) return $error;
@@ -137,6 +104,22 @@ class Auth
 		return false;
 	}
 
+	public function update_user($data, $id = false, $validate_array = array('email', 'username', 'password', 'captcha')) {
+		$update_data = array();
+		$validate = array();
+		if(!isint($id)) {
+			$id = $this->user()->id;
+		}
+		foreach($data as $i => $d) $validate[] = $i; 
+		$errors = $this->_validate_data($data, $id, $validate_array);
+		if($errors['count'] != 0) return $errors;
+		foreach($this->_editable_user_columns as $c) {
+			if(isset($data[$c])) $update_data[$c] = $data[$c];
+		}
+		$this->_CI->users_model->update_user($id, $update_data);
+		return true;
+	}
+
 	public function is_logged_in() {
 		if(isint($this->user_session())) return true;
 		$uid = $this->_CI->input->cookie('user_id');
@@ -169,13 +152,13 @@ class Auth
 		$this->_CI->input->set_cookie(array(
 			'name' 	=> 'user_id',
 			'value' => false,
-			'expire' => time()-100,
+			'expire' => -100,
 			'secure' => false
 		));
 		$this->_CI->input->set_cookie(array(
 			'name' 	=> 'user_code',
 			'value' => false,
-			'expire' => time()-100,
+			'expire' => -100,
 			'secure' => false
 		));
 	}
@@ -232,6 +215,129 @@ class Auth
 		}
 
 		return true;
+	}
+
+	public function _validate_data($d, $id = false, $validate_array = array('email', 'username', 'password', 'captcha')) {
+		if(isint($id)) $user = $this->user($id);
+		else $user = false;
+
+		$error_messages = $this->_CI->config->item('error_messages');
+		$error = array('messages' => array(), 'count' => 0, 'fields' => array());
+
+		// Check for E-Mail
+		if(in_array('email', $validate_array)) {
+			$error['fields']['email'] = false;
+			if(!valid_email($d['email'])) 
+			{
+				$error['messages']['invalid_email'] = $error_messages['invalid_email'];
+				$error['fields']['email'] = true;
+			}
+			if(($user == false || $user->email != $d['email']) && count($this->_CI->users_model->user_by_email($d['email'])) > 0) 
+			{
+				$error['messages']['email_exists'] = sprintf($error_messages['email_exists'], htmlentities($d['email']));
+				$error['fields']['email'] = true;
+			}
+
+		}
+
+		// Check for username
+		if(in_array('username', $validate_array)) {
+			if($user == false || $user->username != $d['username'])
+				$error['fields']['username'] = !$this->_validate_name($d['username'], false, $error['messages']);
+		}
+
+		// Check for ingame-name
+		if(in_array('ingame_name', $validate_array)) {
+			if($user == false || $user->ingame_name != $d['ingame_name'])
+				$error['fields']['ingame_name'] = !$this->_validate_name($d['ingame_name'], true, $error['messages']);
+		}
+
+		// Check for password
+		if(in_array('password', $validate_array)) {
+			$error['fields']['password'] = false;
+			if(strlen($d['password']) < $this->_CI->config->item('password_min_length')) {
+				$error['messages']['password_too_short'] = sprintf($error_messages['password_too_short'], $this->_CI->config->item('password_min_length'));
+				$error['fields']['password'] = true;
+			}
+			if($d['password_verification'] !== false && $d['password_verification'] != $d['password']) {
+				$error['messages']['passwords_do_not_match'] = $error_messages['passwords_do_not_match'];
+				$error['fields']['password'] = true;
+			}
+		}
+
+		// Check for captcha
+		if(in_array('captcha', $validate_array)) {
+			if($captcha !== null && $captcha != true) {
+				$error['messages']['wrong_captcha'] = $error_messages['wrong_captcha'];
+				$error['fields']['captcha'] = true;
+			}
+		}
+
+		$error['count'] = count($error['messages']);
+		return $error;
+	}
+
+	private function _validate_name($name, $ingame_name = false, &$error = array()) {
+		$error_messages = $this->_CI->config->item('error_messages');
+		$hit_disallowed_characters = array();
+		
+		if($ingame_name) { 
+			$dis_c_array = $this->_ingame_disallowed_characters;
+			$dis_c_regex = $this->_ingame_regex;
+			$maxlength = $this->_CI->users_model->max_ingame_name_length();
+			$ep = 'ingame_';
+		} else {
+			$dis_c_array = $this->_username_disallowed_characters;
+			$dis_c_regex = $this->_username_regex;
+			$maxlength = $this->_CI->users_model->max_username_length();
+			$ep = 'username_';
+		}
+
+		if($this->_CI->users_model->user_exists($name) && $ingame_name == false) 
+			$error[$ep . 'exists'] = sprintf($error_messages[$ep . 'exists'], htmlentities($name));
+		elseif($this->_CI->users_model->ingame_name_exists($name) && $ingame_name == true)
+			$error[$ep . 'exists'] = sprintf($error_messages[$ep . 'exists'], htmlentities($name));
+
+		for($i = 0; $i < strlen($name); $i++) {
+			if(in_array($name[$i], $dis_c_array)) {
+				$hit_disallowed_characters[] = $name[$i];
+			}
+		}
+		
+		$dis_chars_count = count($hit_disallowed_characters);
+		if($dis_chars_count == 1) {
+			$error[$ep.'disallowed_char'] = sprintf($error_messages[$ep.'disallowed_char'], '\'' . $hit_disallowed_characters[0] . '\'');
+		} elseif($dis_chars_count > 1) {
+			$last_dis_char = $hit_disallowed_characters[$dis_chars_count-1];
+			unset($hit_disallowed_characters[$dis_chars_count-1]);
+			$replace = '\'' . implode('\', \'', $hit_disallowed_characters) . '\'';
+			$replace .= ' ' . $this->_language_and . ' \'' . $last_dis_char . '\'';
+			$error[$ep.'disallowed_chars'] = sprintf($error_messages[$ep.'disallowed_chars'], $replace);
+		}
+
+		$match = preg_match($dis_c_regex, $name, $matches);
+		if(!$match || $matches[0] != $name) {
+			$hit_disallowed_characters = $this->_return_non_matching_characters($dis_c_regex, $name);
+			$dis_chars_count = count($hit_disallowed_characters);
+			if($dis_chars_count == 1) {
+				$error[$ep.'regex_disallowed_char'] = sprintf($error_messages[$ep.'regex_disallowed_char'], '\'' . $hit_disallowed_characters[0] . '\'');
+			} elseif($dis_chars_count > 1) {
+				$last_dis_char = $hit_disallowed_characters[$dis_chars_count-1];
+				unset($hit_disallowed_characters[$dis_chars_count-1]);
+				$replace = '\'' . implode('\', \'', $hit_disallowed_characters) . '\'';
+				$replace .= ' ' . $this->_language_and . ' \'' . $last_dis_char . '\'';
+				$error[$ep.'regex_disallowed_chars'] = sprintf($error_messages[$ep.'regex_disallowed_chars'], $replace);
+			}
+		}
+
+		if(strlen($name) < $this->_CI->config->item($ep.'min_length')) {
+			$error[$ep.'too_short'] = sprintf($error_messages[$ep.'too_short'], $this->_CI->config->item('username_min_length'), $maxlength);
+		}
+		if(strlen($name) > $maxlength) {
+			$error[$ep.'too_long'] = sprintf($error_messages[$ep.'too_long'], $maxlength, $this->_CI->config->item('username_min_length'));
+		}
+		if(count($error) == 0) return true;
+		return false;
 	}
 }
 
