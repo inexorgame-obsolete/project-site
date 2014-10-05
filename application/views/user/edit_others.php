@@ -4,16 +4,19 @@
 			--><?=form_input($change_picture['background']['delete']);?><!--
 		--><?=form_close();?><!--
 	--></div>
-	<div id="profile_picture">
-		<div class="picture" style="background-image:url(<?=avatar_image($edit_user->id)?>);"></div>
+	<div class="left-bar prevent-eyecatcher">
+		<div id="profile_picture">
+			<div class="picture" style="background-image:url(<?=avatar_image($edit_user->id)?>);"></div>
+		</div>
+		<div id="change_profile_picture">
+			<?=form_open_multipart('user/edit/' . $edit_user->id . '/profile_picture', array('class' => 'ajax-upload'));?>
+				<?=form_input($change_picture['profile']['delete']);?>
+			<?=form_close();?>
+		</div>
+		<a href="<?=site_url("permissions/user/" . $edit_user->id . "/overview");?>">Edit this users permissions</a>
 	</div>
-	<div id="change_profile_picture">
-		<?=form_open_multipart('user/edit/' . $edit_user->id . '/profile_picture', array('class' => 'ajax-upload'));?>
-			<?=form_input($change_picture['profile']['delete']);?>
-		<?=form_close();?>
-	</div>
-	<div id="user-info">
-		<h1 class="text-contrast"><?=showname($edit_user)?></h1>
+	<div class="small-content">
+		<h1 class="text-contrast in-eyecatcher"><?=showname($edit_user)?></h1>
 		<div class="message<?php if(!isset($form_validation['messages']) || count($form_validation['messages']) == 0) echo ' hidden'; ?>"><div class="container">
 			<?php if(isset($form_validation['messages']) && count($form_validation['messages']) > 0) foreach($form_validation['messages'] as $m): ?>
 				<p><?=$m?></p>
