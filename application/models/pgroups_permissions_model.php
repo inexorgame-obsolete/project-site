@@ -33,6 +33,38 @@ class Pgroups_permissions_model extends CI_Model {
 		}
 	}
 
+	public function update($gid, $pid, $value) {
+		$this->db->where('pgroup_id', $gid);
+		$this->db->where('permissions_id', $pid);
+		return $this->db->update($this->_table, array('value' => $value));
+	}
+
+	public function insert($gid, $pid, $value) {
+		return $this->db->insert($this->_table, array(
+			'pgroup_id' => $gid,
+			'permissions_id' => $pid,
+			'value' => $value
+		));
+	}
+
+	public function exists($gid, $pid) {
+		$this->db->where('pgroup_id', $gid);
+		$this->db->where('permissions_id', $pid);
+		$this->db->limit(1, 0);
+		return $this->db->get($this->_table)->row();
+	}
+
+	public function delete($gid, $pid) {
+		$this->db->where('pgroup_id', $gid);
+		$this->db->where('permissions_id', $pid);
+		$this->db->delete($this->_table);
+		return true;
+	}
+
+	public function group_has_permissions($group, $permissions, &$permissions_array = array()) {
+		return $this->groupset_have_permissions(array($group), $permissions, $permissions_array);
+	}
+
 	public function groupset_have_permissions($groupset, $permissions, &$permissions_array = array()) {
 		if(!is_array($permissions_array)) $permissions_array = array();
 		foreach($groupset as $g) {
