@@ -6,7 +6,6 @@ class Data extends CI_Controller {
 	public function __construct() {
 		parent::__construct();
 		$this->load->library('auth');
-		$this->load->model('subgroup_model');
 		$this->load->database();
 		$this->load->library('data_lib');
 		$this->load->library('template');
