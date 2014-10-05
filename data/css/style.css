@@ -243,6 +243,9 @@ table.vertical-editable td .small-triangle.right {
 	right: auto;
 	left: -2px;
 }
+.textarea-label {
+	margin-top: 8px;
+}
 .full-width {
 	width: 100%;
 }

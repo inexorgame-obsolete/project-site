@@ -19,6 +19,7 @@ class Permission extends CI_Controller {
 	public function list_groups($start = 1, $results = 30)
 	{
 		$data = array();
+		$data['add_group'] = false;
 		$this->_search_field($data['search']);
 		if(isset($_POST[$data['search']['submit']['name']]))
 		{
@@ -29,6 +30,18 @@ class Permission extends CI_Controller {
 		$data['groups'] = $this->pgroups_model->get_groups($start, $results);
 		$data['start'] = $start / $results + 1;
 		$data['results'] = $results;
+		if($this->permissions->has_user_permission('add_permission_groups')) $this->_create_group_form($data['add_group']);
+		if($this->permissions->has_user_permission('add_permission_groups') && isset($_POST['add_group'])) {
+			
+			if(str_replace(' ', '', $_POST['groupname']) == '') $data['add_group_error'] = 'Please enter a name for the group';
+			if($this->pgroups_model->get_group_by_name($_POST['groupname']) !== false) $data['add_group_error'] = 'The name already exists. Please enter another one.';
+
+			if(!isset($data['add_group_error'])) {
+				$this->pgroups_model->add_group($_POST['groupname'], $_POST['description']);
+				$group = $this->pgroups_model->get_group_by_name($_POST['groupname']);
+				redirect('permission/group/' . $group->id);
+			}
+		}
 		$data['max_pagination'] = $this->pgroups_model->max_pagination($results);
 		$this->load->view('permissions/list_groups', $data);
 	}
@@ -44,13 +57,25 @@ class Permission extends CI_Controller {
 		$data['start'] = $start / $results + 1;
 		$data['results'] = $results;
 		$data['searchstring'] = $search;
+		if($this->permissions->has_user_permission('add_permission_groups')) $this->_create_group_form($data['add_group']);
+		if($this->permissions->has_user_permission('add_permission_groups') && isset($_POST['add_group'])) {
+			
+			if(str_replace(' ', '', $_POST['groupname']) == '') $data['add_group_error'] = 'Please enter a name for the group';
+			if($this->pgroups_model->get_group_by_name($_POST['groupname']) !== false) $data['add_group_error'] = 'The name already exists. Please enter another one.';
+
+			if(!isset($data['add_group_error'])) {
+				$this->pgroups_model->add_group($_POST['groupname'], $_POST['description']);
+				$group = $this->pgroups_model->get_group_by_name($_POST['groupname']);
+				redirect('permission/group/' . $group->id);
+			}
+		}
 		$data['max_pagination'] = $this->pgroups_model->search_max_pagination($search, $results);
 		$this->load->view('permissions/search_groups', $data);
 	}
 
-	public function group($id, $start = 1, $results = false, $sub_results = 30)
+	public function group($id = false, $start = 1, $results = false, $sub_results = 30)
 	{
-		
+		if($id == false) { show_404(); return; }
 		if(!isint($start)) {
 			// Check if a specific permission is set to display just this permission. This permission would be identified because $start has to be a string, not an int.
 			if($permission = $this->permissions_model->get_permission_by_name($start))
@@ -154,6 +179,35 @@ class Permission extends CI_Controller {
 		show_404();
 	}
 
+
+	private function _create_group_form(&$data) {
+		$data['name_label'] = array(
+			'content' => 'Name',
+			'for' => 'create_group_name'
+		);
+		$data['description_label'] = array(
+			'content' => 'Description',
+			'for' => 'create_group_description',
+			'class' => 'textarea-label'
+		);
+		$data['name'] = array(
+			'id' => 'create_group_name',
+			'type' => 'text',
+			'name' => 'groupname',
+			'value' => $this->input->post('groupname')
+		);
+		$data['description'] = array(
+			'id' => 'create_group_description',
+			'name' => 'description',
+			'value' => $this->input->post('description')
+		);
+		$data['submit'] = array(
+			'class' => 'centered',
+			'name' => 'add_group',
+			'type' => 'submit',
+			'value' => 'Add group'
+		);
+	}
 
 	private function _search_field(&$data, $value = '', $start = 1, $limit = 30) {
 		$data['search'] = array(

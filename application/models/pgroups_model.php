@@ -14,8 +14,10 @@ class Pgroups_model extends CI_Model {
 	}
 
 	public function get_group_by_name($name) {
-		$query = $this->db->get_where($this->_table, array('name' => $name));
-		return $query->row();
+		$query = $this->db->get_where($this->_table, array('LOWER(name)' => strtolower($name)));
+		$r = $query->row();
+		if(isset($r->name)) return $r;
+		return false;
 	}
 
 	public function get_permissions_by_parent($id) {
@@ -23,12 +25,11 @@ class Pgroups_model extends CI_Model {
 		return $query->result_array();
 	}
 
-	public function new_group($name, $description, $significance = NULL) {
+	public function add_group($name, $description) {
 		$data = array(
 			'name' => $name,
 			'description' => $description
 		);
-		if(is_int($significance)) { $data['significance'] = $significance; }
 		$this->db->insert($this->_table, $data);
 	}
 

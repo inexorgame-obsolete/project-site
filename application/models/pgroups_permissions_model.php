@@ -90,7 +90,7 @@ class Pgroups_permissions_model extends CI_Model {
 			foreach($permissions as $p) {
 				$permissions_array[$g][$p] = NULL;
 			}
-			if($res == false) return false;
+			if(isset($res) && $res == false) return false;
 			elseif(count($permissions) == 0) return true;
 		}
 		return $permissions;

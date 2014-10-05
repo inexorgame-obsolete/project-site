@@ -30,7 +30,6 @@
 		</tr>
 		<?php endif; ?>
 	</table>
-
 	<div class="vertical-nav">
 	<?php 
 	if($start <= $max_pagination):
@@ -58,5 +57,15 @@
 	endif;
 	?>
 	</div>
+	<?php if($add_group) : ?>
+	<?=form_open(false, 'class="large"');?>
+		<h3>Add Group</h3>
+		<div class="input"><?=form_label($add_group['name_label']['content'], $add_group['name_label']['for']) . form_input($add_group['name']);?></div>
+		<div class="input"><?=form_label($add_group['description_label']['content'], $add_group['description_label']['for'], array('class' => $add_group['description_label']['class'])) . form_textarea($add_group['description']);?></div>
+		<?php if(isset($add_group_error)): ?>
+			<p><?=$add_group_error;?></p>
+		<?php endif; ?>
+		<div class="input"><?=form_submit($add_group['submit']);?></div>
+	<?php endif; ?>
 
 </div>
