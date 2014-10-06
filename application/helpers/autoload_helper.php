@@ -1,9 +1,13 @@
 <?php
 if(!function_exists('isint')) {
-	function isint(&$val) {
+	function isint(&$val, $fallback = false) {
 		if(ctype_digit($val) || is_int($val)) {
 			$val = (int) $val;
 			return true;
+		}
+		if(is_int($fallback))
+		{
+			$val = $fallback;
 		}
 		return false;
 	}
