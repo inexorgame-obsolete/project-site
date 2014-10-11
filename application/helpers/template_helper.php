@@ -9,10 +9,13 @@ function data($file)
 	return false;
 }
 function css($file) { return data('css/' . $file . '.css'); }
-function dcss($file) {
+function dcss($file, $media = false) {
 	if($file = css($file)) 
 	{
-		echo '<link rel="stylesheet" type="text/css" href="' . $file . '" />' . "\n";
+		$echo = '<link rel="stylesheet" type="text/css" ';
+		if($media) $echo .= 'media="' . $media . '" ';
+		$echo .= 'href="' . $file . '" />' . "\n";
+		echo $echo;
 		return true;
 	}
 	return false;
