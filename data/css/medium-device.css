@@ -1,0 +1,7 @@
+#user-info .user-edit-item label, #user-info .user-edit-item input, #user-info .user-edit-item textarea {
+	float: none;
+	display: block;
+}
+footer > .content > section {
+	width: 50%;
+}
