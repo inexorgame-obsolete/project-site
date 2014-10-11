@@ -8,6 +8,9 @@
 	<?php
 		dcss('style');
 		dcss('OpenSans');
+		dcss('medium-device', '(max-width: 960px)');
+		dcss('small-device', '(max-width: 800px)');;
+		dcss('mini-device', '(max-width: 600px)');
 	?>
 	<script src="<?=js('jquery')?>"></script>
 	<script src="<?=js('bg-pointer')?>"></script>

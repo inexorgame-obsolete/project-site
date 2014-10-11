@@ -15,18 +15,14 @@
 		</div>
 		<a href="<?=site_url("permission/user/" . $edit_user->id . "/");?>">Edit this users permissions</a>
 	</div>
-	<div class="small-content">
-		<h1 class="text-contrast in-eyecatcher"><?=showname($edit_user)?></h1>
+	<div id="user-info">
+		<h1 class="text-contrast"><?=showname($edit_user)?></h1>
 		<div class="message<?php if(!isset($form_validation['messages']) || count($form_validation['messages']) == 0) echo ' hidden'; ?>"><div class="container">
 			<?php if(isset($form_validation['messages']) && count($form_validation['messages']) > 0) foreach($form_validation['messages'] as $m): ?>
 				<p><?=$m?></p>
 			<?php endforeach; ?>
 		</div></div>
 		<?=form_open('user/edit/' . $edit_user->id);?>
-			<?php /* <div class="user-edit-item">
-				<?=form_label('E-Mail', $edit_form['email']['id']);?>
-				<?=p_r(form_input($edit_form['email']));?>
-			</div> */ ?>
 			<div class="user-edit-item">
 				<?=form_label('E-Mail', $edit_form['email']['id']);?>
 				<?=p_r(form_input($edit_form['email']));?>
