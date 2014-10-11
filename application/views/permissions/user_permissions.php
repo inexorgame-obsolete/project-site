@@ -1,6 +1,6 @@
 <div class="centered">
 	<h1 class="text-contrast in-eyecatcher"><?=ph($user->username);?> (ingame: <?=ph($user->ingame_name);?>)</h1>
-	<p><em>About:</em> <?=ph($user->about);?></p>
+	<a href="<?=site_url('permission/user/' . $id . '/groups/');?>" class="full-width link-button">Go to this users groups</a>
 	<h1>Permissions</h1>
 	<div class="search">
 

@@ -16,6 +16,32 @@ class Permission extends CI_Controller {
 		$this->has_perm = $this->permissions->has_user_permission('edit_permissions');
 	}
 
+	public function index() {
+		$data['form'] = array(
+			'input'  => array('type' => 'text', 'name' => 'link', 'placeholder' => 'Profile link...'),
+			'submit' => array('type' => 'submit', 'name' => 'submit', 'value' => 'Edit permissions') 
+		);
+		$data['error'] = false;
+		if(isset($_POST['submit'])) {
+			if(preg_match('/\/user\/(?:edit\/)?(\d*)/i', $_POST['link'], $matches)) {
+				if(isint($matches[1]))
+				{
+					if($this->auth->user($matches[1]))
+					{
+						redirect('/permission/user/' . $matches[1]);
+					} else {
+						$data['error'] = 'No user with this URL exists.';
+					}
+				} else {
+					$data['error'] = 'The URL is not a valid user-URL.';
+				}
+			} else {
+				$data['error'] = 'The URL is not a valid user-URL.';
+			}
+		}
+		$this->load->view('permissions/index', $data);
+	}
+
 	public function user_groups($id = false, $order = 'DESC')
 	{
 		if($this->permissions->has_user_permission('edit_permissions', $id) && !$this->permissions->has_user_permission('edit_permission_editors_permissions'))
