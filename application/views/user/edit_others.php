@@ -13,7 +13,7 @@
 				<?=form_input($change_picture['profile']['delete']);?>
 			<?=form_close();?>
 		</div>
-		<a href="<?=site_url("permissions/user/" . $edit_user->id . "/overview");?>">Edit this users permissions</a>
+		<a href="<?=site_url("permission/user/" . $edit_user->id . "/");?>">Edit this users permissions</a>
 	</div>
 	<div class="small-content">
 		<h1 class="text-contrast in-eyecatcher"><?=showname($edit_user)?></h1>
