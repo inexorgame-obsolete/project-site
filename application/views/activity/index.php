@@ -32,7 +32,7 @@
 		<div class="spotlight">
 			<a href="<?=base_url();?>user/<?=$p['user']->id?>" class="full"><div class="avatar" style="background-image:url(<?=avatar_image($p['user']->id)?>);"></div><?=showname($p['user'], 'user one-line')?><span class="date" title="<?=tm($p['timestamp'])?>"><?=dt($p['timestamp'])?></span></a>
 			<div class="topics">
-				<?=$p['changes']?>
+				<?=nl2br(ph($p['changes']))?>
 			</div>
 			<?php foreach($youtube as $y) : ?>
 				<div class="youtube-container">

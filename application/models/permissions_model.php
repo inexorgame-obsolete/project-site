@@ -28,8 +28,8 @@ class Permissions_model extends CI_Model {
 		if($this->db->get($this->_table)->num_rows() > 0) return true;
 		return false;
 	}
-	public function get_permissions($no_parent = true, $start = 0, $limit = 30, $order_by = 'name', $order = 'ASC') {
-		if($no_parent == true) $this->db->where('parent', NULL);
+	public function get_permissions($parents = false, $start = 0, $limit = 30, $order_by = 'name', $order = 'ASC') {
+		if($parents == false) $this->db->where('parent', NULL);
 		$this->db->order_by($order_by, $order);
 		return $this->db->get($this->_table, $limit, $start)->result();
 	}

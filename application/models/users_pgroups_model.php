@@ -18,13 +18,11 @@ class Users_pgroups_model extends CI_Model {
 		return $query->result();
 	}
 
-	public function user_group_ids($userid)
+	public function user_group_ids($userid, $orderby = 'significance', $order = 'DESC')
 	{
 		$return = array();
-		$this->db->where('user_id', $userid);
-		$this->db->order_by('significance', 'DESC');
-		$query = $this->db->get($this->_table);
-		foreach($query->result() as $r) {
+		$result = $this->user_groups($userid);
+		foreach($result as $r) {
 			$return[] = $r->group_id;
 		}
 		return $return;
@@ -47,15 +45,21 @@ class Users_pgroups_model extends CI_Model {
 	}
 
 	public function users_highest_significance($userid) {
-		$this->db->where('user_id');
+		$this->db->where('user_id', $userid);
 		$this->db->order_by('significance', 'DESC');
 		$query = $this->db->get($this->_table, 1);
 		return $query->row()->significance;
 	}
 
+	public function users_lowest_significance($userid) {
+		$this->db->where('user_id', $userid);
+		$this->db->order_by('significance', 'ASC');
+		$query = $this->db->get($this->_table, 1);
+		return $query->row()->significance;
+	}
+
 	public function add_user_to_group($userid, $groupid, $significance = NULL) {
-		if($significance) $significance = true;
-		else $significance = false;
+		if(!isint($significance)) $significance = $this->users_lowest_significance($userid) - 1;
 		$data = array(
 			'user_id'  		=> $userid,
 			'group_id' 		=> $groupid,
@@ -71,9 +75,14 @@ class Users_pgroups_model extends CI_Model {
 		$this->db->delete($this->_table);
 	}
 
+	public function remove($id) {
+		$this->db->where('id', $id);
+		$this->db->delete($this->_table);
+	}
+
 	public function change_significance($userid, $groupid, $significance) {
-		$this->db->where('user_id', $id);
-		$this->db->where('group_id');
+		$this->db->where('user_id', $userid);
+		$this->db->where('group_id', $groupid);
 		$this->db->update($this->_table, array('significance' => $significance));
 	}
 }

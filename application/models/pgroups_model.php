@@ -9,8 +9,8 @@ class Pgroups_model extends CI_Model {
 	}
 
 	public function get_group($id) {
-		 $query = $this->db->get_where($this->_table, array('id' => $id));
-		 return $query->row();
+		$query = $this->db->get_where($this->_table, array('id' => $id));
+		return $query->row();
 	}
 
 	public function get_group_by_name($name) {

@@ -51,4 +51,32 @@ class Users_permissions_model extends CI_Model {
 		}
 	}
 
+	public function update($gid, $pid, $value) {
+		$this->db->where('user_id', $gid);
+		$this->db->where('permissions_id', $pid);
+		return $this->db->update($this->_table, array('value' => $value));
+	}
+
+	public function insert($gid, $pid, $value) {
+		return $this->db->insert($this->_table, array(
+			'user_id' => $gid,
+			'permissions_id' => $pid,
+			'value' => $value
+		));
+	}
+
+	public function exists($gid, $pid) {
+		$this->db->where('user_id', $gid);
+		$this->db->where('permissions_id', $pid);
+		$this->db->limit(1, 0);
+		return $this->db->get($this->_table)->row();
+	}
+
+	public function delete($gid, $pid) {
+		$this->db->where('user_id', $gid);
+		$this->db->where('permissions_id', $pid);
+		$this->db->delete($this->_table);
+		return true;
+	}
+
 }

@@ -18,7 +18,9 @@ a:link, a:visited {
 	font-weight: 600;
 	color: inherit;
 }
-
+input[size="4"] {
+	width: 70px;
+}
 header {
 	width: 100%;
 	/*height: 100px;*/
@@ -58,6 +60,9 @@ hr {
 pre.inline {
 	display: inline-block;
 	margin: 0;
+}
+tr.error, td.error {
+	border: 2px solid #C00;
 }
 .submit_form {
 	float: right;
