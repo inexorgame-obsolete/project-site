@@ -224,7 +224,7 @@ class User extends CI_Controller {
 				'edit_others_password',
 				'delete_others_profile_picture',
 				'delete_others_background_picture'
-			), true);
+			), false, true);
 			$this->_get_edit_others_data($data, $edit_user, $permissions_array);
 
 			if(isset($_POST['submit'])) {
@@ -245,6 +245,16 @@ class User extends CI_Controller {
 			}
 
 			$data['edit_user'] = $edit_user;
+
+			$data['edit_user_permissions'] = false;
+			if($this->permissions->has_user_permission('edit_permissions'))
+			{
+				if($this->permissions->has_user_permission('edit_permission_editors_permissions') || !$this->permissions->has_user_permission('edit_permissions', $edit_user->id))
+				{
+					$data['edit_user_permissions'] = true;
+				}
+			}
+
 			$this->_render_page('user/edit_others', $data);
 
 		

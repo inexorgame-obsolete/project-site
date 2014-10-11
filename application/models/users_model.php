@@ -49,7 +49,7 @@ class Users_model extends CI_Model {
 		$this->db->like($columns[0], $name);
 		unset($columns[0]);
 		foreach($columns as $column) {
-			$this->db->or_like($columns[0], $name);
+			$this->db->or_like($column, $name);
 		}
 		return $this->db->get($this->_table)->result();
 

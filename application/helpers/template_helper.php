@@ -67,6 +67,10 @@ function he($string) {
 	echo h($string);
 	return;
 }
+function ph($string) 
+{
+	return p_r(h($string));
+}
 function link_links($string) {
 	return preg_replace("/(http|https|ftp|ftps)\:\/\/[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(\/\S*)?/", '<a target="_blank" href="$0">$0</a>', $string);
 }

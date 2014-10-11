@@ -18,7 +18,9 @@ a:link, a:visited {
 	font-weight: 600;
 	color: inherit;
 }
-
+input[size="4"] {
+	width: 70px;
+}
 header {
 	width: 100%;
 	/*height: 100px;*/
@@ -58,6 +60,9 @@ hr {
 pre.inline {
 	display: inline-block;
 	margin: 0;
+}
+tr.error, td.error {
+	border: 2px solid #C00;
 }
 .submit_form {
 	float: right;
@@ -106,6 +111,14 @@ pre.inline {
 .container {
 	position: relative;
 }
+.left-bar {
+	width: 215px;
+	float: left;
+}
+.small-content {
+	max-width: 655px;
+	float: right;
+}
 .video-coverage {
 	width: 100%;
 	height: 540px;
@@ -121,6 +134,9 @@ pre.inline {
 .video {
 	margin: auto;
 	width: 900px;
+}
+.prevent-eyecatcher {
+	margin-bottom: 90px;
 }
 table.settings {
 	width: 100%;
@@ -138,6 +154,140 @@ table.settings td {
 }
 table.settings tr:nth-child(even){
 	background-color: #EFEFEF;
+}
+table.info {
+	border-collapse: collapse;
+	width: 100%;
+}
+table.info td:first-child {
+	width: 20%;
+}
+table.info thead td {
+	font-weight: bold;
+	font-style: italic;
+	background-color: #666;
+	color: #FFF;
+}
+table.info td {
+	position: relative;
+	padding: 10px;
+}
+table.info td a {
+	display: block;
+	margin: -10px;
+	padding: 10px;
+	font-weight: normal;
+	cursor: pointer;
+}
+table.info tr:nth-child(even) {
+	background-color: #DFDFDF;
+}
+table.info tr:nth-child(odd) {
+	background-color: #EFEFEF;
+}
+table.info tr.linked:hover {
+	background-color: #CCC;
+}
+table.info tr.no-results {
+	text-align: center;
+}
+table.vertical-editable {
+	margin: 0 auto;
+}
+table.vertical-editable, table.vertical-editable table {
+	border-collapse: collapse;
+	background-color: #333;
+	color: #FFF;
+}
+table.vertical-editable table {
+	height: 100%;
+	width: 100%;
+}
+table.vertical-editable td.name {
+	background-color: #666;
+	font-style: italic;
+	font-weight: bold;
+}
+table.vertical-editable table td.name {
+	position: relative;
+	max-width: 400px;
+}
+table.vertical-editable td.name a {
+	display: block;
+	padding: 10px 20px;
+}
+table.vertical-editable td.description,
+table.vertical-editable td.permissions {
+	padding: 10px 20px;
+	min-width: 200px;
+	max-width: 400px;
+}
+table.vertical-editable td.contains-table {
+	position: relative;
+}
+table.vertical-editable table td.contains-table {
+	padding: 0px;
+}
+table.vertical-editable table tr:nth-child(3) {
+	border-bottom: 10px solid #333;
+}
+table.vertical-editable table tr:last-child {
+	border-bottom: none;
+}
+table.vertical-editable td {
+	position: relative;
+	padding: 0;
+}
+table.vertical-editable td.name, table td.description {
+	border-right: 2px solid #CCC;
+}
+table.vertical-editable td.name.no-childs, table td.description.no-childs {
+	border-right: none;
+}
+table.vertical-editable td .small-triangle.right {
+	right: auto;
+	left: -2px;
+}
+.textarea-label {
+	margin-top: 8px;
+}
+.full-width {
+	width: 100%;
+}
+.vertical-overflow-scroll {
+	width: 100%;
+	overflow-x: auto;
+}
+.small-triangle {
+	display: inline-block;
+	height: 0;
+	position: absolute;
+	left: 0;
+	top: 50%;
+}
+.small-triangle.right {
+	left: auto;
+	right: 0;
+}
+.small-triangle > * {
+	display: inline-block;
+	position: absolute;
+	z-index: 1;
+	top: -10px;
+	width: 0;
+	height: 0;
+}
+.small-triangle-left {
+	right: 0;
+	border-top: 10px solid transparent;
+	border-bottom: 10px solid transparent;
+	border-right: 10px solid #CCC;
+}
+.small-triangle-right {
+	left: 0;
+	border-top: 10px solid transparent;
+	border-bottom: 10px solid transparent;
+	border-left: 10px solid #CCC;
 }
 .pagination {
 	color: #CCC;
@@ -710,14 +860,10 @@ h1.in-eyecatcher {
 #change_profile_picture {
 	padding: 10px 5px 5px 5px;
 	border-radius: 0 0 5px 5px;
-	margin-top: 80px;
-	position: absolute;
 	left: 0;
-	display: block;
 	width: 203px;
 	border: 1px solid #CCC;
 	border-top: none;
-	float: left;
 }
 #change_profile_picture input[type="file"] {
 	display: block;
