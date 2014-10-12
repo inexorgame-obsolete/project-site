@@ -26,3 +26,13 @@ if(!function_exists('hash_available')) {
 		return false;
 	}
 }
+if(!function_exists('mail_host')) {
+	function mail_host() {
+		if(strpos(':', $_SERVER['HTTP_HOST']) === false && strpos('/', $_SERVER['HTTP_HOST']) === false)
+		{
+			return $_SERVER['HTTP_HOST'];
+		}
+		$url = parse_url($_SERVER['HTTP_HOST']);
+		return $url['host'];
+	}
+}

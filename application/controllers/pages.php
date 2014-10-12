@@ -8,6 +8,7 @@ class Pages extends CI_Controller {
 	}
 
 	public function view($page = 'home') {
+		if($page == 'mail') $this->template->disable();
 		if(!file_exists(APPPATH.'/views/static/' . $page . '.php'))
 		{
 			show_404();

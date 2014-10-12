@@ -234,23 +234,36 @@ class Template {
 		$output = $this->output->get_output();
 		if($disable == FALSE)
 		{
-			if(strlen($this->variable('title')) < 1)
-				$this->variable('title', $this->config->item('title')['default'], TRUE);
-			$variables = $this->config->item('variables');
-			$output = preg_replace_callback('/{([^\:{<}]*):([^{>}]*)}/', function ($hits) {
-				$var = $this->variable($hits[1]);
-				if(!empty($var)) return $var;
-				return $hits[2];
-			}, $output);
-			$output = preg_replace_callback('/{([^\{}<>]*)}/', function ($hits) {
-				$var = $this->variable($hits[1]);
-				if(isset($var)) return $var;
-				return '';
-			}, $output);
-			$output = str_replace(array("{<", ">}"), array("{", "}"), $output);
-			$this->output->set_output($output);
+			$this->output->set_output($this->replace_variables($output));
 		}
 		$this->output->_display();
+	}
+
+	public function replace_variables($output) 
+	{
+		if(strlen($this->variable('title')) < 1)
+			$this->variable('title', $this->config->item('title')['default'], TRUE);
+		$variables = $this->config->item('variables');
+		$output = preg_replace_callback('/{([^\:{<}]*):([^{>}]*)}/', function ($hits) {
+			$var = $this->variable($hits[1]);
+			if(!empty($var)) return $var;
+			return $hits[2];
+		}, $output);
+		$output = preg_replace_callback('/{([^\{}<>]*)}/', function ($hits) {
+			$var = $this->variable($hits[1]);
+			if(isset($var)) return $var;
+			return '';
+		}, $output);
+		$output = str_replace(array("{<", ">}"), array("{", "}"), $output);
+		return $output;
+	}
+
+	public function generate_email($content)
+	{
+		$data = array('content' => $content, 'email' => true);
+		$email = $this->_CI->load->view('static/mail', $data, true);
+		$email = $this->replace_variables($email);
+		return $email;
 	}
 
 	public function __call($name, $arguments) {
