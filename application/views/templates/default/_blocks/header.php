@@ -57,7 +57,7 @@
 	<header>
 		<div class="border menu">
 			<div class="helper">
-				<a href="<?=site_url()?>"><img src="<?=image('logo_small.png'); ?>" alt="sauerfork" /></a>
+				<a href="<?=site_url()?>"><img src="<?=image('logo_small.png'); ?>" alt="{sitetitle}" /></a>
 				<span class="title"><a href="<?=site_url()?>">{sitetitle}</a></span>
 			</div>
 			<ul id="main-menu">
