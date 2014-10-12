@@ -12,7 +12,8 @@ class Auth
 		'ingame_name',
 		'password',
 		'about',
-		'country_code'
+		'country_code',
+		'active'
 	);
 	public function __construct() {
 		$this->_CI =& get_instance();
@@ -70,21 +71,49 @@ class Auth
 
 		if(count($error) > 0) return $error;
 		
-		$this->_CI->users_model->create($email, $username, NULL, $password, ip(), NULL, $this->_require_email_verification);
+		$this->_CI->users_model->create($email, $username, NULL, $password, ip(), NULL, !$this->_require_email_verification);
+		$newuser = $this->_CI->users_model->user_by_username($username);
 		if($this->_require_email_verification == true)
 		{
-			// $this->send_registration_email();
+			$this->_CI->load->model('user_activation_model');
+			$vcode = '';
+			$chars = 'abcdefghijklmnopqrstuvwxyz';
+			$chars_caps = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+			$numbers = '0123456789';
+			$i = 0;
+			while($i < 128) {
+				$cs = substr(str_shuffle($chars), 0, 10);
+				$csc = substr(str_shuffle($chars), 0, 10);
+				$cn = str_shuffle($numbers);
+				$vcode .= substr(str_shuffle($cs.$csc.$cn), 0, 1);
+				$i++;
+			}
+
+			$this->_CI->user_activation_model->insert($newuser->id, $vcode);
+
+			$this->send_registration_email($email, $username, $vcode);
 		}
 		return true;
 	}
 
-	public function send_registration_email() {
+	public function send_registration_email($email, $username, $activation_code) {
+		$this->_CI->load->library('template');
 		$this->_CI->load->library('email');
-		$this->_CI->email->from('');
-		$this->_CI->email->to('');
-		$this->_CI->email->subject('Email test');
-		$this->_CI->email->message('Testing the email class');
 
+		$config = array(
+			'mailtype' => 'html',
+			'wordwrap' => false
+		);
+		$this->_CI->email->initialize($config);
+		$this->_CI->email->from('no-reply@' . mail_host());
+		$this->_CI->email->to($email);
+		$this->_CI->email->subject('Account Verification');
+
+		$this->_CI->email->message($this->_CI->template->generate_email(array(
+			array('tag' => 'h1', 'content' => 'Account Verification'),
+			array('tag' => 'p', 'content' => 'Welcome ' . htmlentities($username) . ','),
+			array('tag' => 'p', 'content' => 'You have been successfully registered! To activate your account please click on the verification-link below: <br />' . "\r\n" . site_url('user/activate/' . urlencode($username) . '/' . $activation_code))
+			)));
 		$this->_CI->email->send();
 	}
 
@@ -161,6 +190,19 @@ class Auth
 			'expire' => -100,
 			'secure' => false
 		));
+	}
+
+	public function activate($username, $activationcode)
+	{
+		$this->_CI->load->model('user_activation_model');
+		$u = $this->_CI->users_model->user_by_username($username);
+		if($u->active == true) return true;
+		if($this->_CI->user_activation_model->is_valid($u->id, $activationcode, true) == true)
+		{
+			$this->_CI->users_model->update_user($u->id, array('active' => true));
+			return true;
+		}
+		return false;
 	}
 
 	public function set_session($uid) {
@@ -267,7 +309,7 @@ class Auth
 
 		// Check for captcha
 		if(in_array('captcha', $validate_array)) {
-			if($captcha !== null && $captcha != true) {
+			if($d['captcha'] != true) {
 				$error['messages']['wrong_captcha'] = $error_messages['wrong_captcha'];
 				$error['fields']['captcha'] = true;
 			}
