@@ -24,6 +24,10 @@
 		</div></div>
 		<?=form_open('user/edit/' . $edit_user->id);?>
 			<div class="user-edit-item">
+				<?=form_label('Active', $edit_form['active']['id']);?>
+				<?=p_r(form_input($edit_form['active']));?>
+			</div>
+			<div class="user-edit-item">
 				<?=form_label('E-Mail', $edit_form['email']['id']);?>
 				<?=p_r(form_input($edit_form['email']));?>
 			</div>

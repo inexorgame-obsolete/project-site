@@ -33,6 +33,17 @@ class User extends CI_Controller {
 		}
 	}
 
+	function activate($username = false, $verification = false)
+	{
+		if($username && $verification)
+		if($this->auth->activate(urldecode($username), $verification))
+		{
+			$this->_render_page('user/activation', array('success' => true));
+			return;
+		}
+		$this->_render_page('user/activation', array('success' => false));
+	}
+
 	function login($site = false) {
 		if($user = $this->auth->user()) redirect('user/' . $user->id);
 		$data = $this->_get_login_form();
@@ -223,7 +234,8 @@ class User extends CI_Controller {
 				'edit_others_about',
 				'edit_others_password',
 				'delete_others_profile_picture',
-				'delete_others_background_picture'
+				'delete_others_background_picture',
+				'change_activation_status'
 			), false, true);
 			$this->_get_edit_others_data($data, $edit_user, $permissions_array);
 
@@ -236,6 +248,7 @@ class User extends CI_Controller {
 				$this->_update_if_allowed($update_data, $data['edit_form']['email'], 'email', $validate_array);
 				$this->_update_if_allowed($update_data, $data['edit_form']['about'], 'about', $validate_array);
 				$this->_update_if_allowed($update_data, $data['edit_form']['ingame_name'], 'ingame_name', $validate_array);
+				$this->_update_if_allowed($update_data, $data['edit_form']['active'], 'active', $validate_array);
 
 				$errors = $this->auth->update_user($update_data, $edit_user->id, $validate_array);
 
@@ -465,6 +478,15 @@ class User extends CI_Controller {
 	}
 
 	private function _get_edit_others_data(&$data, $user, $permissions) {
+		$data['edit_form']['active'] = array(
+			'type' => 'checkbox',
+			'name' => 'active',
+			'id' => 'activate_user',
+			'value' => 'true',
+		);
+		if($user->active == true) $data['edit_form']['active']['checked'] = 'checked';
+		if(!$permissions['change_activation_status']) $this->_add_disabled($data['edit_form']['active']);
+
 		$data['edit_form']['email'] = array(
 			'type' => 'text',
 			'value' => $user->email,
@@ -546,7 +568,8 @@ class User extends CI_Controller {
 
 	private function _update_if_allowed(&$update, $input, $index, &$validate_array = array()) {
 		if(!isset($input['disabled'])) { 
-			$update[$index] = $this->input->post($input['name']);
+			if(isset($input['type']) && $input['type'] == 'checkbox') $update[$index] = $this->input->post($input['name']) ? 1 : 0;
+			else $update[$index] = $this->input->post($input['name']);
 			$validate_array[] = $index;
 			return true; 
 		}
