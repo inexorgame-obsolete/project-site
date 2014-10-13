@@ -36,3 +36,16 @@ if(!function_exists('mail_host')) {
 		return $url['host'];
 	}
 }
+if(!function_exists('get_youtube_links')) {
+	function get_youtube_links($message) {
+		// youtube regex /(?:(?:http?s:)?(?:\/\/)?(?:www\.)?youtu(?:be\.com\/watch(?:.\W*v\=)|\.be\/)([^&\n\t\f\s\r]*))/i
+		$youtube_regex = '/(?:(?:http?s:)?(?:\/\/)?(?:www\.)?youtu(?:be\.com\/watch(?:.\W*v\=)|\.be\/)([^&\n\t\f\s\r]*))/i';
+		preg_match_all($youtube_regex, $message, $matches);
+		return $matches[1];
+	}
+}
+if(!function_exists('link_links')) {
+	function link_links($string) {
+		return preg_replace("/(http|https|ftp|ftps)\:\/\/[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(\/\S*)?/", '<a target="_blank" href="$0">$0</a>', $string);
+	}
+}

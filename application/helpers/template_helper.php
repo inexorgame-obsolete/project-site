@@ -74,9 +74,6 @@ function ph($string)
 {
 	return p_r(h($string));
 }
-function link_links($string) {
-	return preg_replace("/(http|https|ftp|ftps)\:\/\/[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(\/\S*)?/", '<a target="_blank" href="$0">$0</a>', $string);
-}
 function prevent_replace($string) { return str_replace(array("{", "}"), array("{<", ">}"), $string); }
 function p_r($string) { return prevent_replace($string); }
 function d($string, $nl2br = false) {
