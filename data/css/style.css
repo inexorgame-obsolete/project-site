@@ -40,7 +40,7 @@ input[type=text], textarea, input[type=password] {
 	border-radius: 3px;
 }
 input[type=password] {
-	letter-spacing: 3px;
+	letter-spacing: normal;
 }
 input[type=submit] {
 	padding: 10px;
@@ -63,6 +63,9 @@ pre.inline {
 }
 tr.error, td.error {
 	border: 2px solid #C00;
+}
+.right {
+	float: right;
 }
 .submit_form {
 	float: right;
@@ -693,12 +696,86 @@ h1.in-eyecatcher {
 	float: right;
 	display: inline-block;
 }
+.user-showcase .profile-name {
+	line-height: 24px;
+	padding: 0 5px 0 0;
+}
 .user-showcase .avatar {
 	margin-left: 10px;
 	margin-top: 10px;
 }
-.user-showcase .links {
+.user-showcase ul.links, .user-showcase ul.links ul {
 	display: inline-block;
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	text-align: right;
+	vertical-align: top;
+}
+.user-showcase ul.links {
+	margin-top: 5px;
+}
+.user-showcase ul.links > li {
+	line-height: 10px;
+}
+.user-showcase li.user-links li {
+	display: inline-block;
+}
+/* Users-nav */
+#users-nav {
+	-webkit-transition: width .25s;
+	-moz-transition: width .25s;
+	-o-transition: width .25s;
+	transition: width .25s;
+	color: #FFF;
+	z-index: 1000;
+	width: 0;
+	margin: 0;
+	padding: 5px 0 0 0;
+	position: absolute;
+	top: 0;
+	right: 0;
+	height: 100%;
+	position: fixed;
+	list-style: none;
+	background-color: #333;
+	box-shadow: inset 0 0 20px #000;
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+#users-nav:target {
+	width: 300px;
+}
+#users-nav > li {
+	width: 260px;
+	padding: 20px;
+	border-bottom: 1px solid #4F4F4F;
+}
+#users-nav > li.headline {
+	background-color: #4F4F4F;
+	box-shadow: 0 0 10px #000;
+	text-align: center;
+	font-weight: bold;
+}
+#users-nav .user-profile .profile-name {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	float: right;
+	text-align: center;
+	line-height: 50px;
+	padding-right: 10px;
+	width: 190px;
+}
+#users-nav .user-profile .right {
+	margin-right: 10px;
+}
+#users-nav a.item {
+	margin: -20px;
+	padding: 20px;
+	width: 260px;
+	display: inline-block;
+	font-weight: normal;
 }
 /* Tooltip */
 .tooltip .content {
@@ -1053,7 +1130,7 @@ input.create-post {
 	position: relative;
 	margin-bottom: 10px;
 }
-.spotlight a {
+.spotlight > a {
 	min-height: 50px;
 	float: left;
 	background-color: #EFEFEF;
