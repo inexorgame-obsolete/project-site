@@ -5,6 +5,7 @@ class Template {
 	private $_head;
 	private $_variables;
 	private $_CI;
+	private $_user = false;
 
 	public function __construct() {
 		$this->_CI =& get_instance();
@@ -16,6 +17,7 @@ class Template {
 		$this->load->helper('url');
 		$this->load->helper('security');
 		$this->load->helper('language');
+		$this->load->library('permissions');
 		$this->load->library('auth');
 		$this->_data['logged_in'] = $this->auth->is_logged_in();
 
@@ -24,6 +26,9 @@ class Template {
 		if($this->_data['logged_in'])
 		{
 			$user = (array) $this->auth->user();
+			$this->_user = $user;
+			if($user)
+				$this->_CI->permissions->set_user($user['id']);
 			$unsets = array('password', 'salt', 'forgotten_password_code', 'forgotten_password_time', 'remember_code');
 			foreach($unsets as $u) { unset($user[$u]); }
 			$this->_data['user'] = $user;
@@ -87,6 +92,25 @@ class Template {
 	}
 
 	public function render_header() {
+		if($this->_user)
+		{
+			$this->load->model('user_menu_links_model');
+			$menu_links = $this->user_menu_links_model->get_links();
+			$data['menu_links'] = array();
+			foreach($menu_links as $m)
+			{
+				if($m->permission_id != NULL && !$this->_CI->permissions->has_user_permission($m->permission_id)) { continue; }
+				$c = array();
+				foreach($m->childs as $mc)
+				{
+					if($mc->permission_id != NULL && !$this->_CI->permissions->has_user_permission($mc->permission_id)) { continue; }
+					$c[] = $mc;
+				}
+				$m->childs = $c;
+				$data['menu_links'][] = $m;
+			}
+			
+		}
 		if($this->config->item('disable_templating')['this'] == FALSE)
 		{
 			$data['main_search_id'] = 'main_search';

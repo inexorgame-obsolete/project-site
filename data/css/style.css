@@ -775,7 +775,7 @@ h1.in-eyecatcher {
 	padding: 20px;
 	width: 260px;
 	display: inline-block;
-	font-weight: normal;
+	font-weight: inherit;
 }
 /* Tooltip */
 .tooltip .content {
