@@ -69,9 +69,14 @@ class Auth
 		))['messages'];
 
 
+
 		if(count($error) > 0) return $error;
 		
-		$this->_CI->users_model->create($email, $username, NULL, $password, ip(), NULL, !$this->_require_email_verification);
+		$ingame_name = $this->_validate_data(array('ingame_name' => $username), false, array('ingame_name'));
+		if($ingame_name['count'] == 0) $ingame_name = $username;
+		else $ingame_name = NULL;
+
+		$this->_CI->users_model->create($email, $username, $ingame_name, $password, ip(), NULL, !$this->_require_email_verification);
 		$newuser = $this->_CI->users_model->user_by_username($username);
 		if($this->_require_email_verification == true)
 		{
@@ -83,7 +88,7 @@ class Auth
 			$i = 0;
 			while($i < 128) {
 				$cs = substr(str_shuffle($chars), 0, 10);
-				$csc = substr(str_shuffle($chars), 0, 10);
+				$csc = substr(str_shuffle($chars_caps), 0, 10);
 				$cn = str_shuffle($numbers);
 				$vcode .= substr(str_shuffle($cs.$csc.$cn), 0, 1);
 				$i++;
