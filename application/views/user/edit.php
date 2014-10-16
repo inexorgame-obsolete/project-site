@@ -26,7 +26,7 @@
 				<p><?=$m?></p>
 			<?php endforeach; ?>
 		</div></div>
-		<?=form_open('user/edit');?>
+		<?=form_open(NULL, array('autocomplete' => 'off'));?>
 			<?php /* <div class="user-edit-item">
 				<?=form_label('E-Mail', $edit_form['email']['id']);?>
 				<?=p_r(form_input($edit_form['email']));?>
