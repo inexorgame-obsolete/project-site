@@ -33,9 +33,14 @@ function create_html_from_array($array)
 	return $return;
 }
 
-function create_blog_post_from_array($array, $entry_id, $open_tags = array(),  $id = false)
+function create_blog_post_from_array($array, $entry_id, $stop_on_pagebreak = false, $open_tags = array(), $id = false, $ireid = true)
 {
-	if($entry_id != (string) (int) $entry_id) { trigger_error('No $entry_id set.'); $entry_id = rand(0, 9999); };
+	if(!isint($entry_id)) { 
+		trigger_error('No $entry_id set.'); 
+		$entry_id = rand(0, 9999);
+		$ireid = false;
+	}
+
 	if(!is_int($id)) $id = 0;
 	$singleton_tags = array(
 		"img",
@@ -53,7 +58,21 @@ function create_blog_post_from_array($array, $entry_id, $open_tags = array(),  $
 	$return = '';
 	foreach($array as $k => $v)
 	{
-		if($k == 'before') $return .= $v;
+		if($k == 'before') {
+			if($stop_on_pagebreak == true && strpos($v, '<!-- pagebreak -->') !== false)
+			{
+				$return = explode('<!-- pagebreak -->', $v)[0];
+				if($ireid) $return .= '<a href="' . site_url('blog/view/' . $entry_id) . '">Read more...</a>';
+				foreach($array['closing_tag'] as $cv)
+				{
+					unset($open_tags[count($open_tags)-1]);
+					$return .= '</' . $cv . '>';
+				}
+				return $return;
+			}
+			$return .= $v;
+			continue;
+		}
 		if($k == 'tag')
 		{
 			$aatot = false;		// aatot = Add Attributes To Open Tags ;-)
@@ -109,6 +128,7 @@ $return .= '<svg class="image-showcase top" version="1.1" xmlns="http://www.w3.o
 					$return .= '>';
 				}
 			}
+			continue;
 		}
 		if($k == 'closing_tag')
 		{
@@ -117,10 +137,12 @@ $return .= '<svg class="image-showcase top" version="1.1" xmlns="http://www.w3.o
 				unset($open_tags[count($open_tags)-1]);
 				$return .= '</' . $cv . '>';
 			}
+			continue;
 		}
 		if($k == 'after')
 		{
-			$return .= call_user_func(__FUNCTION__, $v, $entry_id, $open_tags, $id++);
+			$return .= call_user_func(__FUNCTION__, $v, $entry_id, $stop_on_pagebreak, $open_tags, $id++, $ireid);
+			continue;
 		}
 	}
 	return $return;

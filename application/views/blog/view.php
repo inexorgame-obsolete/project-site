@@ -1,7 +1,7 @@
 
 <div class="blog-centered">
 	<h1 class="text-contrast in-eyecatcher"><?=d($entry->headline)?></h1>
-	<?=create_blog_post_from_array($entry->body, $entry->id)?>
+	<?=create_blog_post_from_array($entry->body, $entry->id, false);?>
 	<?php if($user_edit_others || $user_may_release) : ?>
 	<ul class="vertical-nav">
 	<li><a href="<?=site_url('blog/edit/' . $entry->id)?>">Edit post</a></li>
