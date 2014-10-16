@@ -14,6 +14,7 @@ class Permission extends CI_Controller {
 		if(!$this->user) return;
 		$this->permissions->set_user($this->user->id);
 		$this->has_perm = $this->permissions->has_user_permission('edit_permissions');
+		$this->template->add_css('tables');
 	}
 
 	public function index() {

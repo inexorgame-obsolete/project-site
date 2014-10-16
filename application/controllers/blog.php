@@ -15,6 +15,7 @@ class Blog extends CI_Controller {
 		$this->load->library('auth');
 
 		$this->load->library('template');
+		$this->template->add_css($this);
 	}
 
 	public function index($site = 1)
@@ -95,6 +96,7 @@ class Blog extends CI_Controller {
 	}
 
 	public function create($subblog = 'main') {
+		$this->template->add_css('data');
 
 		$user = $this->auth->user();
 		

@@ -225,6 +225,16 @@ class Template {
 	}
 
 	public function add_css($file, $class = false) {
+		if(is_object($file)) {
+			$class = get_class($file);
+			$class = strtolower($class);
+			if(file_exists(FCPATH . 'data/css/modules/' . $class . '.css'))
+			{
+				$this->add_head('<link rel="stylesheet" type="text/css" href="' . base_url() . 'data/css/modules/' . $class . '.css" />');
+				return true;
+			}
+			return false;
+		}
 		if(is_object($class)) $class = get_class($class);
 		elseif(!is_string($class) && !is_numeric($class)) $class = false;
 		if($class) $file = 'modules/' . $class . '/' . $file;

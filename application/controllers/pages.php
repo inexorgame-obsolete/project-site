@@ -5,6 +5,7 @@ class Pages extends CI_Controller {
 		parent::__construct();
 		$this->config->load('static_pages');
 		$this->load->library('template');
+		$this->template->add_css($this);
 	}
 
 	public function view($page = 'home') {

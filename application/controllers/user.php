@@ -16,6 +16,7 @@ class User extends CI_Controller {
 		$this->load->library('permissions');
 		$this->load->library('reCaptcha');
 		$this->load->library('template');
+		$this->template->add_css($this);
 	}
 
 	function index()
@@ -59,8 +60,9 @@ class User extends CI_Controller {
 		$this->_render_page('user/login', $data);
 	}
 
-	function logout() {
+	function logout($redirect = false) {
 		$this->auth->logout();
+		if($redirect === false) redirect('user/logout');
 		$this->_render_page('user/logout');
 	}
 
@@ -243,8 +245,9 @@ class User extends CI_Controller {
 				$update_data = array();
 				$validate_array = array();
 				$this->_update_if_allowed($update_data, $data['edit_form']['username'], 'username', $validate_array);
-				$this->_update_if_allowed($update_data, $data['edit_form']['password'], 'password', $validate_array);
 				$this->_update_if_allowed($update_data, $data['edit_form']['password_verification'], 'password_verification', $validate_array);
+				if(isset($update_data['password_verification']))
+					$this->_update_if_allowed($update_data, $data['edit_form']['password'], 'password', $validate_array);
 				$this->_update_if_allowed($update_data, $data['edit_form']['email'], 'email', $validate_array);
 				$this->_update_if_allowed($update_data, $data['edit_form']['about'], 'about', $validate_array);
 				$this->_update_if_allowed($update_data, $data['edit_form']['ingame_name'], 'ingame_name', $validate_array);
@@ -294,7 +297,7 @@ class User extends CI_Controller {
 				if($update_data['ingame_name'] == $user->ingame_name) 		unset($update_data['ingame_name']);
 
 				if($this->auth->check_password_id($user->id, $this->input->post($data['edit_form']['old_password']['name']))) {
-					$errors = $this->auth->update_user($update_data);
+					$errors = $this->auth->update_user($update_data, false, array_keys($update_data));
 					$data['form_validation'] = array('success' => TRUE);
 					if($errors['count'] > 0) {
 						$data['form_validation']['errors'] = TRUE;
@@ -567,6 +570,7 @@ class User extends CI_Controller {
 	}
 
 	private function _update_if_allowed(&$update, $input, $index, &$validate_array = array()) {
+		if(strlen($this->input->post($input['name'])) == 0 && $input['type'] != 'checkbox') return false;
 		if(!isset($input['disabled'])) { 
 			if(isset($input['type']) && $input['type'] == 'checkbox') $update[$index] = $this->input->post($input['name']) ? 1 : 0;
 			else $update[$index] = $this->input->post($input['name']);
