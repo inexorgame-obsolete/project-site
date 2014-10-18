@@ -2,13 +2,23 @@
 
 class User_menu_links_model extends CI_Model {
 
+	// The table in the database
 	private $_table = 'user_menu_links';
 
+	/**
+	 * Magic Method __construct();
+	 */
 	function __construct() {
 		$this->load->database();
 	}
 
-	public function get_links($permissions = array(), $add = array(), $remove = array()) 
+	/**
+	 * Get the menu links which have default = 1 or $add and are not $remove
+	 * @param array $add Id's of links which should be added
+	 * @param array $remove Id's of links which should not be shown
+	 * @return object containing objects of links
+	 */
+	public function get_links($add = array(), $remove = array()) 
 	{
 		$where  = ' ((( `link` IS NOT NULL AND `default` = 1 )';
 		if(count($add) != 0)
@@ -54,11 +64,20 @@ class User_menu_links_model extends CI_Model {
 		return $return;
 	}
 
+	/**
+	 * Gets a menu-link by its id
+	 * @param int $id menu-link-id
+	 * @return object menu-link-object
+	 */
 	public function get($id) {
 		$this->db->where('id', $id);
 		return $this->db->get($this->_table)->row();
 	}
 
+	/**
+	 * Adds parents to a link; Is added like $object->parents[parent_id]
+	 * @param object &$object the object containing the menu-link-objects
+	 */
 	public function add_parents(&$object)
 	{
 		// via IN - query parents nach order sortieren
@@ -72,11 +91,22 @@ class User_menu_links_model extends CI_Model {
 		}
 	}
 
+	/**
+	 * Creates a NOT-IN-SQL string
+	 * @param array $array values which should be in the NOT-IN string
+	 * @return string NOT-IN string (not including the column)
+	 */
 	private function _not_in($array)
 	{
 		if(strlen($this->_in($array)) == 0) return '';
 		return ' NOT' . $this->_in($array);
 	}
+
+	/**
+	 * Creates a IN-SQL string
+	 * @param array $array values which should be in the IN string
+	 * @return string IN string (not including the column)
+	 */
 	private function _in($array)
 	{
 		$return = ' IN (';

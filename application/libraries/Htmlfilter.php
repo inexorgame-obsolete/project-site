@@ -1,16 +1,40 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+/**
+ * Filters a string for HTML-tags and allows specific (in a filter specified) tags,
+ * Example-Filter:
+ * 
+ * 	$filter = array(
+ * 		"element" => array(
+ * 			"attribute" => "content (as normal text or as array with allowed texts or as regular expression)",
+ * 			"style" => array(
+ * 				"attribute" => array(
+ * 					"option 1",
+ * 					"option 2"
+ * 				),
+ * 				"attribute2" => array(
+ * 					"px" => array("500", "600"),
+ * 					"em" => array("1", "1.1")
+ * 				)
+ * 			)
+ * 		)
+ * 	)
+ */
+
+
 /*
-Genereller Aufbau des filters (whitelist method):
+
+Filters a string for HTML-tags and allows specific (in a filter specified) tags,
+Example-Filter:
 
 $filter = array(
 	"element" => array(
-		"attribut" => "inhalt (als normaler text, array mit erlaubten inhalten oder regex)",
+		"attribute" => "content (as normal text or as array with allowed texts or as regular expression)",
 		"style" => array(
-			"attribut" => array(
+			"attribute" => array(
 				"option 1",
 				"option 2"
-			)
-			"attribut" => array(
+			),
+			"attribute2" => array(
 				"px" => array("500", "600"),
 				"em" => array("1", "1.1")
 			)
@@ -23,10 +47,19 @@ $filter = array(
 
 
 class Htmlfilter {
+	// The filter (as specified above)
 	public $filter;
+
+	// The markup to filter
 	public $markup;
-	public $replaces = false;	// will be used as str_replace($replaces['search'], $replaces['replace'], $text); Will be executed on TEXT AND DISALLOWED TAGS ONLY, won't be executed on valid tags, classes and other attributes
+
+	// will be used as str_replace($replaces['search'], $replaces['replace'], $text); Will be executed on TEXT AND DISALLOWED TAGS ONLY, won't be executed on valid tags, classes and other attributes
+	public $replaces = false;
+
+	// Replaces for attributes
 	public $attr_replaces = false;
+
+	// Singleton tags (tags not needing a closing tag)
 	public $singleton_tags = array(
 		"img",
 		"base",
@@ -41,6 +74,8 @@ class Htmlfilter {
 		"param",
 		"source"
 		);
+
+	// CSS units
 	public $css_units = array(
 		"em",
 		"px",
@@ -52,10 +87,15 @@ class Htmlfilter {
 		"pt",
 		"pc"
 		);
-	private $_tag_regex = '';
 
+	/**
+	 * Magic Method __construct();
+	 */
 	public function __construct() {}
 
+	/**
+	 * Parses the markup
+	 */
 	public function parse()
 	{
 		if(!is_array($this->filter)) { trigger_error("No filter defined", E_USER_ERROR); return; }
@@ -67,6 +107,13 @@ class Htmlfilter {
 		$this->markup = $markup;
 	}
 
+	/**
+	 * Creates an HTML-Markup-array which was not parsed and validated through the filter.
+	 * So disallowed tags are still inside as normal HTML
+	 * @param string $markup The markup which should be divided
+	 * @param int $depth The depth of the current HTML-string
+	 * @return array HTML-Markup-array
+	 */
 	private function _filter_tags($markup, $depth = 0) {
 		$open_tag_regex = '/<([\/]?[A-Z][A-Z0-9]*)\b([^>]*)>/im';
 		$attributes_regex = '/([^= "\'.]*)="([^"]*)"|([^= "\'.]*)=\'([^\']*)\'/';
@@ -104,6 +151,12 @@ class Htmlfilter {
 		return $return;
 	}
 
+	/**
+	 * Validates the content of an HTML-Markup-array
+	 * @param array $markup HTML-Markup-array
+	 * @param array $opentags Currently open tags, needed if another tag is closed
+	 * @return string Validated HTML-string where disallowed tags are escaped
+	 */
 	private function _validate_html($markup, $opentags = array())
 	{
 		$return = array();
@@ -203,11 +256,22 @@ class Htmlfilter {
 		return $return;
 	}
 
+	/**
+	 * Correctly escapes HTML
+	 * @param string $string The string to be escaped
+	 * @return string The correctly escaped string
+	 */
 	private function _escape_html($string)
 	{
 		return htmlentities($string, ENT_COMPAT | ENT_HTML5, 'UTF-8', FALSE);
 	}
 
+	/**
+	 * Validates and correctly formats a style attribute
+	 * @param string $style The CSS-style-string
+	 * @param array $filter The CSS-filter
+	 * @return string Correctly formated and validated CSS-style-string
+	 */
 	private function _validate_style_attr($style, $filter)
 	{
 		$return = '';
@@ -270,116 +334,3 @@ class Htmlfilter {
 		return substr($return, 1);	// Remove first space
 	}
 }
-
-/*			FILTER WITH HTML COMPOSITION
-		$return = '';
-		if(isset($markup['before']))
-		{
-			$return .= htmlentities($markup['before']);
-		}
-		if(isset($markup['tag'])) 
-		{
-			$tag = $markup['tag'];
-			if(isset($this->filter[$tag])) $filter = $this->filter[$tag];
-			else $filter = false;
-			if($tag[0]!='/')
-			{
-				if(!in_array($tag, $this->singleton_tags)) $opentags[] = $tag;
-				if($filter)
-				{
-					$return .= '<' . $tag;
-
-					if(isset($markup['attributes']))
-					{
-						foreach($markup['attributes'] as $k => $v)
-						{
-							$k = strtolower($k);
-							if($k == 'style' && isset($filter['style'])) {
-								$validated_css = $this->_validate_style_attr($v, $filter['style']);
-								if(strpos($validated_css, '"')!==false)
-								{
-									$return .= " style='" . $validated_css . "'";
-								}
-								else 
-								{
-									$return .= ' style="' . $validated_css . '"';
-								}
-							} elseif(isset($filter[$k])) {
-								if($filter[$k][0] == '/') 
-								{
-									if(preg_match($filter[$k], $v, $matches) && $matches[0] == $v)
-									{
-										if(strpos($v, '"')!==false)
-										{
-											$return .= " " . $k . "='" . $v . "'";
-										}
-										else
-										{
-											$return .= ' ' . $k . '="' . $v . '"';
-										}
-									}
-								}
-								else
-								{
-									if($filter[$k] == $v || (is_array($filter[$k]) && in_array($v, $filter[$k])))
-									{
-										if(strpos($v, '"')!==false)
-										{
-											$return .= " " . $k . "='" . $v . "'";
-										}
-										else
-										{
-											$return .= ' ' . $k . '="' . $v . '"';
-										}
-									}
-								}
-							}
-						}
-					}
-					$return .= '>';
-				} else {
-					$return .= '&lt;';
-					$return .= htmlentities($tag);
-					if(isset($markup['attributes'])) {
-						foreach($markup['attributes'] as $k => $v)
-						{
-							if(stpos($v, '"')!==false)
-							{
-								$return .= " " . htmlentities($k) . "=&apos;" . htmlentities($v) . "&apos;";
-							}
-							else
-							{
-								$return .= ' ' . htmlentities($k) . '=&quot;' . htmlentities($v) . '&quot;';
-							}
-						}
-					}
-					$return .= '&gt;';
-				}
-			} else {
-				$tag = substr($tag, 1);
-				if(in_array($tag, $opentags) && isset($this->filter[$tag])) 
-				{
-					for($i = count($opentags) - 1; $i >= 0; $i--)
-					{
-						if($opentags[$i] == $tag)
-						{
-							$return .= '</' . htmlentities($opentags[$i]) . '>';
-							unset($opentags[$i]);
-							break;
-						} else {
-							$return .= '</' . htmlentities($opentags[$i]) . '>';
-						}
-						unset($opentags[$i]);
-					}
-				}
-				else
-				{
-					$return .= '&lt;/' . htmlentities($tag) . '&gt;';
-				}
-			}
-		}
-		if(isset($markup['after'])) {
-			$return .= $this->_validate_html($markup['after'], $opentags);
-		}
-		return $return;
-		*/

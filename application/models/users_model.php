@@ -1,9 +1,18 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 class Users_model extends CI_Model {
+
+	// The table in the database
 	private $_table = 'users';
+
+	// Hash-algorithms used for the password-hashing (all available will be used)
 	private $_hash_algos = array('whirlpool', 'sha512');
 
+	// The dir of the data-folder of the user
 	private $_data_dir = false;
+
+	/**
+	 * Magic Method __construct();
+	 */
 	public function __construct() {
 		parent::__construct();
 		$this->load->database();
@@ -17,21 +26,42 @@ class Users_model extends CI_Model {
 		}
 	}
 
-
+	/**
+	 * Gets a user from the database
+	 * @param int $id user-id
+	 * @return object user-object
+	 */
 	public function user($id) {
 		$this->db->where('id', $id);
 		$query = $this->db->get($this->_table);
 		return $query->row();
 	}
 
+	/**
+	 * Update a user
+	 * @param int $id user-id
+	 * @param array $data new, changed data
+	 * @param bool $password_is_hashed if password is changed; whether it needs to be hashed
+	 */
 	public function update_user($id, $data, $password_is_hashed = FALSE) {
 		if(!$password_is_hashed && isset($data['password'])) $data['password'] = $this->real_hash_password($id, $data['password']);
 		$this->db->where('id', $id);
 		$this->db->update($this->_table, $data);
-		return true;
 	}
 
-	public function users_like($name, $columns = array('username', 'ingame_name'), $limit = NULL, $offset = NULL, $start = true, $end = true, $order = 'ASC', $by = 'username') {
+	/**
+	 * Searches for users
+	 * @param string $name search-string
+	 * @param array $columns search-columns
+	 * @param int $limit search-limit
+	 * @param int $offset search-offset
+	 * @param bool $start % before search-string
+	 * @param bool $end % after search-string
+	 * @param string $by the column on which the search is based
+	 * @param string $order ASC or DESC
+	 * @return object containing user-objects
+	 */
+	public function users_like($name, $columns = array('username', 'ingame_name'), $limit = NULL, $offset = NULL, $start = true, $end = true, $by = 'username', $order = 'ASC') {
 		if(is_array($name)) {
 			if(isset($name['columns']) && is_array($name['columns']))           $columns = $name['columns']; 
 			if(isset($name['limit'])   && isint($name['limit']))                $limit   = $name['limit'];   
@@ -55,31 +85,60 @@ class Users_model extends CI_Model {
 
 	}
 
+	/**
+	 * Gets a user-object by the username
+	 * @param string $username user-name
+	 * @return object user-object
+	 */
 	public function user_by_username($username) {
 		$this->db->where('username', $username);
 		$query = $this->db->get($this->_table);
 		return $query->row();
 	}
 
+	/**
+	 * Get user by unique_id
+	 * @param string $unique_id user-unique-id
+	 * @return object user-object
+	 */
 	public function user_by_unique_id($unique_id) {
 		$this->db->where('unique_id', $unique_id);
 		$query = $this->db->get($this->_table);
 		return $query->row();
 	}
 
-	public function user_by_email($email, $limit = NULL, $start = NULL, $array = false) {
+	/**
+	 * Gets a user by e-mail
+	 * @param string $email user-email
+	 * @return object user-object
+	 */
+	public function user_by_email($email) {
 		$this->db->where('email', $email);
 		$query = $this->db->get($this->_table, $limit, $start);
-		if($array != false) return $query->result_array();
-		return $query->result();
+		return $query->row();
 	}
 
+	/**
+	 * Gets all users with a specific country-code
+	 * @param string $code 3-ISO-Letter
+	 * @param int $limit results-limit
+	 * @param int $start results-offset
+	 * @return object containing user-objects
+	 */
 	public function users_by_country_code($code, $limit = NULL, $start = NULL) {
 		$this->db->where('country_code', $code);
 		$query = $this->db->get($this->_table, $limit, $start);
 		return $query->result();
 	}
 
+	/**
+	 * Gets all users
+	 * @param string $orderby order-column
+	 * @param string $order order-type (ASC or DESC)
+	 * @param int $limit result-limit
+	 * @param int $start result-offset
+	 * @return object containing user-objects
+	 */
 	public function users($orderby = 'username', $order = 'ASC', $limit = 50, $start = 0) {
 		$orderby = strtolower($orderby);
 		$order = strtoupper($order);
@@ -90,18 +149,39 @@ class Users_model extends CI_Model {
 		return $query->result();
 	}
 
+	/**
+	 * Checks if a username exists
+	 * @param string $username user-name to check
+	 * @return bool TRUE if exists
+	 */
 	public function user_exists($username) {
 		$this->db->where('username', $username);
 		if($this->db->get($this->_table)->num_rows() > 0) return true;
 		return false;
 	}
 
+	/**
+	 * Check if an ingame_name exists
+	 * @param string $name ingame-name to check
+	 * @return bool TRUE if exists
+	 */
 	public function ingame_name_exists($name) {
 		$this->db->where('ingame_name', $name);
 		if($this->db->get($this->_table)->num_rows() > 0) return true;
 		return false;
 	}
 
+	/**
+	 * Creates a user
+	 * @param string $email user-email
+	 * @param string $username username
+	 * @param string $ingame_name ingame_name
+	 * @param string $password not hashed password
+	 * @param string $register_ip the registration ip
+	 * @param string $country_code 3-letter ISO-code
+	 * @param bool $active Active or not TRUE: Active
+	 * @return bool false if username already exists
+	 */
 	public function create($email, $username, $ingame_name, $password, $register_ip, $country_code, $active) {
 		// The username should be validated before.
 		// Because of security-reasons it will be checked here as well.
@@ -139,6 +219,14 @@ class Users_model extends CI_Model {
 		return true;
 	}
 
+	/**
+	 * Check if username and password matches
+	 * @param string $username user-name
+	 * @param string $password unhashed user-password
+	 * @param bool $active Whether the user needs to be active 
+	 * @param bool $email Whether $username is an e-mail
+	 * @return mixed user-id if matches, else BOOL(FALSE)
+	 */
 	public function check_password($username, $password, $active = TRUE, $email = FALSE)
 	{
 		$this->db->where($email ? 'email' : 'username', $username);
@@ -152,6 +240,13 @@ class Users_model extends CI_Model {
 		return false;
 	}
 
+	/**
+	 * Checks if userid and password matches 
+	 * @param int $id user-id
+	 * @param string $password unhashed user-password
+	 * @param bool $active Wheter the user needs to be active
+	 * @return bool TRUE if matches
+	 */
 	public function check_password_id($id, $password, $active = TRUE)
 	{
 		$this->db->where('id', $id);
@@ -165,12 +260,24 @@ class Users_model extends CI_Model {
 		return false;
 	}
 
+	/**
+	 * Hashes a password based on the unique-id
+	 * @param int $id user-id
+	 * @param string $password unhashed password
+	 * @return mixed STRING(password) hashed; BOOL(FALSE) if user does not exist
+	 */
 	public function real_hash_password($id, $password) {
 		$user = $this->user($id);
 		if(!$user) return false;
 		return $this->hash_password($user->unique_id, $password);
 	}
 
+	/**
+	 * Hashes a password
+	 * @param string $salt password-salt
+	 * @param string $password unhashed password
+	 * @return string hashed password
+	 */
 	public function hash_password($salt, $password) {
 		$hashes = hash_algos();
 		$alogs = array();
@@ -183,12 +290,20 @@ class Users_model extends CI_Model {
 		return $return;
 	}
 	
+	/**
+	 * Returns the maximum username-length
+	 * @return mixed BOOL(FALSE) if not set in the config; ELSE INT(maxlength)
+	 */
 	public function max_username_length() {
 		$fielddata = $this->db->field_data($this->_table);
 		foreach($fielddata as $f) { if($f->name == 'username') { return (int) $f->max_length; }}
 		return false;
 	}
 
+	/**
+	 * Returns the maximum ingame-name-length
+	 * @return mixed BOOL(FALSE) if not set in the config; ELSE INT(maxlength)
+	 */
 	public function max_ingame_name_length() {
 		$fielddata = $this->db->field_data($this->_table);
 		foreach($fielddata as $f) { if($f->name == 'ingame_name') { return (int) $f->max_length; }}

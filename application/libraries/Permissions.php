@@ -1,13 +1,17 @@
 <?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 class Permissions {
-
+	// The codeigniter object
 	private $_CI;
+
+	// The userid to check the permissions for
 	private $_userid;
+
+	// The groupid to check the permissions for
 	private $_groupid;
-	private $_permissions = array();
-	private $_permission_names = array();
-	private $_user_permissions = array();
-	private $_group_permissions = array();
+
+	/**
+	 * Magic Method __construct();
+	 */
 	public function __construct() {
 		$this->_CI =& get_instance();
 		$this->_CI->load->model('permissions_model');

@@ -1,7 +1,15 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 class Permission extends CI_Controller {
+
+	// The user object
 	public $user = false;
+
+	// Does the user have the permission to view the general permissions
 	public $has_perm = false;
+
+	/**
+	 * Magic Method __construct()
+	 */
 	public function __construct() {
 		parent::__construct();
 		$this->load->model('permissions_model');
@@ -17,6 +25,9 @@ class Permission extends CI_Controller {
 		$this->template->add_css('tables');
 	}
 
+	/**
+	 * Index file, redirects to the user profiles (via profile link) and to the group managment; Explains how the system works
+	 */
 	public function index() {
 		$data['form'] = array(
 			'input'  => array('type' => 'text', 'name' => 'link', 'placeholder' => 'Profile link...'),
@@ -43,6 +54,11 @@ class Permission extends CI_Controller {
 		$this->load->view('permissions/index', $data);
 	}
 
+	/**
+	 * The groups of a user; Allows to add or remove from groups
+	 * @param int $id id of the user
+	 * @param string $order DESC|ASC; Order of the group-names
+	 */
 	public function user_groups($id = false, $order = 'DESC')
 	{
 		if($this->permissions->has_user_permission('edit_permissions', $id) && !$this->permissions->has_user_permission('edit_permission_editors_permissions'))
@@ -74,6 +90,12 @@ class Permission extends CI_Controller {
 		$this->load->view('permissions/user_groups', $data);
 	}
 
+	/**
+	 * The permissions of a user
+	 * @param int $id id of the user
+	 * @param int $start pagination start
+	 * @param int $results results per site
+	 */
 	public function user_permissions($id = false, $start = 1, $results = 30) {
 		if($id === false) { show_404(); return; }
 		$data = array();
@@ -114,6 +136,11 @@ class Permission extends CI_Controller {
 		$this->load->view('permissions/user_permissions', $data);
 	}
 
+	/**
+	 * Lists all groups
+	 * @param int $start start of pagination
+	 * @param int $results results per site
+	 */
 	public function list_groups($start = 1, $results = 30)
 	{
 		$data = array();
@@ -144,6 +171,12 @@ class Permission extends CI_Controller {
 		$this->load->view('permissions/list_groups', $data);
 	}
 
+	/**
+	 * Groups search
+	 * @param string $search search-string
+	 * @param int $start start of pagination
+	 * @param int $results results per site
+	 */
 	public function search_groups($search, $start = 1, $results = 30)
 	{
 		$data = array();
@@ -171,6 +204,12 @@ class Permission extends CI_Controller {
 		$this->load->view('permissions/search_groups', $data);
 	}
 
+	/**
+	 * Group-permissions
+	 * @param int $id id of the group
+	 * @param int $start start of the pagination of permissions
+	 * @param mixed $results IF INT: results per page IF STRING: The permission-view for this group on this specific permission to edit permission-childs 
+	 */
 	public function group($id = false, $start = 1, $results = false)
 	{
 		if($id == false) { show_404(); return; }
@@ -209,6 +248,11 @@ class Permission extends CI_Controller {
 		$this->load->view('permissions/group', $data);
 	}
 
+	/**
+	 * The permission-view for this group on this specific permission to edit permission-childs 
+	 * @param int $groupid id of the group to be viewed
+	 * @param object $permission the permissions-object of the parent
+	 */
 	private function _group_permission($groupid, $permission) {
 		$this->load->model('pgroups_permissions_model');
 		$data = array();
@@ -223,6 +267,11 @@ class Permission extends CI_Controller {
 		$this->load->view('permissions/group_permission', $data);
 	}
 
+	/**
+	 * The permission-view for this user on this specific permission to edit the permission-childs
+	 * @param int $userid id of the user
+	 * @param object $permission ther permissions-parent of the parent
+	 */
 	private function _user_permission($userid, $permission) {
 		$this->load->model('users_permissions_model');
 		$data = array();
@@ -236,6 +285,12 @@ class Permission extends CI_Controller {
 		$this->load->view('permissions/user_permission', $data);
 	}
 
+	/**
+	 * Creates form for updating users pgroups
+	 * @param array $groups the groups-array of the user
+	 * @param int $userid id of the user
+	 * @return array returns error-array including messages if something failed.
+	 */
 	private function _update_users_groups(&$groups, $userid) {
 		$gs = $groups;
 		$sigs = array();
@@ -273,10 +328,13 @@ class Permission extends CI_Controller {
 		return $errors;
 	}
 
+	/**
+	 * Checks via checking the form if the user has the permissions and updates the data of the specified group.
+	 * @param int $groupid The groupid to update
+	 */
 	private function _update_permissions($groupid) {
 		$i = 0;
-		while(true) {
-			if(!isset($_POST['pointer_' . $i]) || !isint($_POST['pointer_' . $i])) break;
+		while(isset($_POST['pointer_' . $i]) && isint($_POST['pointer_' . $i])) {
 			$pid = $_POST['pointer_' . $i];
 			if($this->input->post('default_' . $pid)) {
 				$this->pgroups_permissions_model->delete($groupid, $pid);
@@ -299,10 +357,13 @@ class Permission extends CI_Controller {
 		}
 	}
 
+	/**
+	 * Checks via checking the form if the user has the permissions and updates the data of the specified user.
+	 * @param int $userid The userid to update
+	 */
 	private function _update_user_permissions($userid) {
 		$i = 0;
-		while(true) {
-			if(!isset($_POST['pointer_' . $i]) || !isint($_POST['pointer_' . $i])) break;
+		while(isset($_POST['pointer_' . $i]) && isint($_POST['pointer_' . $i])) {
 			$pid = $_POST['pointer_' . $i];
 			if($this->input->post('level_' . $pid)) {
 				$this->users_permissions_model->delete($userid, $pid);
@@ -325,6 +386,11 @@ class Permission extends CI_Controller {
 		}
 	}
 
+	/**
+	 * Adds to an array if the user has the permission for the group specified in the same group.
+	 * @param array &$data Data array containing the permission-id
+	 * @param int $id userid
+	 */
 	private function _add_has_permission_recursive(&$data, $id)
 	{
 		$data['has_permission'] = $this->pgroups_permissions_model->has_group_permission($id, $data['id']);
@@ -335,6 +401,11 @@ class Permission extends CI_Controller {
 			}
 	}
 
+	/**
+	 * Adds to an array if the user has the permission.
+	 * @param array &$data Data array containing the permission-id
+	 * @param int $id userid
+	 */
 	private function _add_has_user_permission_recursive(&$data, $id)
 	{
 		$data['has_permission'] = $this->permissions->has_user_specific_permission($data['id'], $id, $data['level']);
@@ -345,6 +416,11 @@ class Permission extends CI_Controller {
 			}
 	}
 
+	/**
+	 * Remapper
+	 * @param string $method Method to be called
+	 * @param array $params array of parameters
+	 */
 	public function _remap($method, $params = array())
 	{
 		if(!$this->has_perm) return $this->template->render_permission_error();
@@ -375,7 +451,10 @@ class Permission extends CI_Controller {
 		show_404();
 	}
 
-
+	/**
+	 * Adds groupform to data array
+	 * @param array $data the array to be added
+	 */
 	private function _create_group_form(&$data) {
 		$data['name_label'] = array(
 			'content' => 'Name',
@@ -405,6 +484,13 @@ class Permission extends CI_Controller {
 		);
 	}
 
+	/**
+	 * Adds the searchform to the data array
+	 * @param array &$data the data array to add the form to
+	 * @param string $value the current value
+	 * @param int $start Pagination-start
+	 * @param int $limit results per site
+	 */
 	private function _search_field(&$data, $value = '', $start = 1, $limit = 30) {
 		$data['search'] = array(
 			'type'  => 'text',
@@ -428,6 +514,13 @@ class Permission extends CI_Controller {
 		);
 	}
 
+	/**
+	 * Creates recursive the inputs to edit the permissions for one group
+	 * @param array &$data the data to add the form-data to
+	 * @param array $permissions recursive array of permission containing the childs
+	 * @param int $groupid the group id to edit the permissions for
+	 * @param int &$i control variable through recursion so every permission has it own id and the id's are starting from 0
+	 */
 	private function _create_recursive_permission_inputs(&$data, $permissions, $groupid, &$i = 0)
 	{
 		$data['pointers'][$permissions['id']] = array(
@@ -481,6 +574,13 @@ class Permission extends CI_Controller {
 		}
 	}
 
+	/**
+	 * Creates recursive the inputs to edit the permissions for one user
+	 * @param array &$data the data to add the form-data to
+	 * @param array $permissions recursive array of permission containing the childs
+	 * @param int $groupid the group id to edit the permissions for
+	 * @param int &$i control variable through recursion so every permission has it own id and the id's are starting from 0
+	 */
 	private function _create_recursive_user_permission_inputs(&$data, $permissions, $groupid, &$i = 0)
 	{
 		$data['pointers'][$permissions['id']] = array(
@@ -535,6 +635,11 @@ class Permission extends CI_Controller {
 		}
 	}
 
+	/**
+	 * Create permisison inputs for editing multiple parent-permissions at once for a group
+	 * @param array &$data the array to add the form data to
+	 * @param array $permissions containing permissions which could be edited
+	 */
 	private function _create_permission_inputs(&$data, $permissions) {
 		$i = 0;
 		foreach($permissions as $p)
@@ -571,6 +676,11 @@ class Permission extends CI_Controller {
 		);
 	}
 
+	/**
+	 * Create permisison inputs for editing multiple parent-permissions at once for a user
+	 * @param array &$data the array to add the form data to
+	 * @param array $permissions containing permissions which could be edited
+	 */
 	private function _create_user_permission_inputs(&$data, $permissions) {
 		$i = 0;
 		foreach($permissions as $p)
@@ -608,6 +718,12 @@ class Permission extends CI_Controller {
 		);
 	}
 
+	/**
+	 * Adds form for editing a users groups
+	 * @param array &$data the array to add the form-data to
+	 * @param array $permissions array of permissions so
+	 * @return type
+	 */
 	private function _create_users_groups_form(&$data, $permissions)
 	{
 		$i = 0;
@@ -643,6 +759,10 @@ class Permission extends CI_Controller {
 		}
 	}
 
+	/**
+	 * Adds form for adding a user to a group
+	 * @param array &$data adds the form-data to the array
+	 */
 	private function _create_add_user_to_group_form(&$data)
 	{
 		$data['submit'] = array(

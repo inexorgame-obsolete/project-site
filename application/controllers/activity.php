@@ -1,6 +1,10 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 class Activity extends CI_Controller {
 
+	/**
+	 * Magic Method __construct()
+	 * Adding library
+	 */
 	public function __construct() {
 		parent::__construct();
 
@@ -14,6 +18,10 @@ class Activity extends CI_Controller {
 		$this->load->library('template');
 	}
 
+	/**
+	 * Index and single page
+	 * @param int $site pagination-link
+	 */
 	public function index($site = 1) 
 	{
 		$data = array();
@@ -55,6 +63,10 @@ class Activity extends CI_Controller {
 		$this->load->view('activity/index', $data);
 	}
 
+	/**
+	 * Form-data for the index-site
+	 * @return array form-data
+	 */
 	private function _index_post_data()
 	{
 		$data['text'] = array(
@@ -81,9 +93,14 @@ class Activity extends CI_Controller {
 		return $data;
 	}
 
+	/**
+	 * Remapper, $parameters are not used, $method set navigation
+	 * @param int $method pagination-site
+	 * @param array $params 
+	 */
 	public function _remap($method, $params)
 	{
-		if($method == (string) (int) $method)
+		if(isint($method))
 		{
 			return $this->index($method);
 		}

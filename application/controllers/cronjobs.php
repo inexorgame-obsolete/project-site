@@ -1,8 +1,15 @@
 <?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 class Cronjobs extends CI_Controller {
+
+	// Dir of the cronjob-libraries
 	private $_cronjobdir = 'application/libraries/cronjobs/';
+
+	/**
+	 * Magic Method __construct
+	 */
 	public function __construct() {
 		parent::__construct();
+		// Only allow Command-Line-Interface-requests, no external requests
 		if(!$this->input->is_cli_request()) 
 		{
 			show_404();
@@ -10,6 +17,12 @@ class Cronjobs extends CI_Controller {
 		}
 	}
 
+	/**
+	 * Index site
+	 * @param string $group dir of a group-files
+	 * @param array $methods Array of methods to be executed in group-files (parameters are not possible here)
+	 * @return bool returns true if at least one file was loaded
+	 */
 	public function index($group, $methods)
 	{
 		if(!is_dir(FCPATH . $this->_cronjobdir . $group . '/')) return false;
@@ -33,6 +46,12 @@ class Cronjobs extends CI_Controller {
 		return true;
 	}
 
+	/**
+	 * Load file-cronjob to execute multiple methods without parameters inside
+	 * @param string $file file-location without .php
+	 * @param array $methods array of methods to be executed
+	 * @return bool returns true if file exists
+	 */
 	public function file($file, $methods)
 	{
 		$loadlib = $this->_load_if_exists($file . '.php');
@@ -46,8 +65,16 @@ class Cronjobs extends CI_Controller {
 				call_user_func_array(array($this->$loadlib, $method), array());
 			}
 		}
+		return true;
 	}
 
+	/**
+	 * Calls one method in one file with multiple parameters
+	 * @param string $file file-location without .php
+	 * @param string $method method-name
+	 * @param array $params array of arguments; First index = first argument, second index = second argument...
+	 * @return mixed returns false if file does not exists; else returns function-call-return
+	 */
 	public function filemethod($file, $method, $params) 
 	{
 
@@ -59,6 +86,11 @@ class Cronjobs extends CI_Controller {
 		}	
 	}
 
+	/**
+	 * Remaps the functions so default method for is index and calles by default default_group inside the file-groups
+	 * @param string $method name of the method to call
+	 * @param array $params parameters to be submitted
+	 */
 	public function _remap($method, $params = array())
 	{
 		if($method == 'file')
@@ -78,6 +110,11 @@ class Cronjobs extends CI_Controller {
 		}
 	}
 
+	/**
+	 * Loads cronjob-library if exists
+	 * @param string $file file-location inside cronjob-dir
+	 * @return type
+	 */
 	private function _load_if_exists($file) {
 		if(!file_exists(FCPATH . $this->_cronjobdir . $file)) return false;
 		$loadlib = substr($file, 0, strlen($file) - 4);

@@ -1,11 +1,25 @@
 <?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 class Auth
 {
+	// Boolean that dertimines if the user wants to stay logged in
 	private $_stay_logged_in;
+
+	// CodeIgniter object
 	private $_CI;
+
+	// Checks if a email-verification is still required
 	private $_require_email_verification = 0;
-	private $_disallowed_characters;
+
+	// Disallowed username characters
+	private $_username_disallowed_characters;
+
+	// Disallowed ingame-name characters
+	private $_ingame_disallowed_characters;
+
+	// 'and' for other languages (used in error-displaying; maybe used in later versions)
 	private $_language_and = 'and';
+
+	// columns which an admin is allowed to edit
 	private $_editable_user_columns = array(
 		'email',
 		'username',
@@ -15,6 +29,10 @@ class Auth
 		'country_code',
 		'active'
 	);
+
+	/**
+	 * Magic Method __construct();
+	 */
 	public function __construct() {
 		$this->_CI =& get_instance();
 		$this->_CI->load->model('users_model');
@@ -30,10 +48,16 @@ class Auth
 		$this->_ingame_disallowed_characters 	= $this->_CI->config->item('ingame_disallowed_characters');
 		$this->_username_regex 					= $this->_CI->config->item('username_regex');
 		$this->_ingame_regex 					= $this->_CI->config->item('ingame_name_regex');
-		$this->_stay_logged_in = $this->_CI->config->item('stay_logged_in_time');
+		$this->_stay_logged_in 					= $this->_CI->config->item('stay_logged_in_time');
 
 	}
 
+	/**
+	 * Magic Method __call(); Pass-trough to the users_model
+	 * @param string $method Method in the users_model
+	 * @param array $arguments The arguments to pass trough
+	 * @return mixed The return of $method-function
+	 */
 	public function __call($method, $arguments)
 	{
 		if (!method_exists( $this->_CI->users_model, $method) )
@@ -44,6 +68,13 @@ class Auth
 		return call_user_func_array(array($this->_CI->users_model, $method), $arguments);
 	}
 
+	/**
+	 * Trys to log the user in
+	 * @param string $username username or email
+	 * @param string $password the not-hashed password
+	 * @param bool $stay_logged_in TRUE: Sets user cookie and adds entry so the user stays logged in
+	 * @return mixed BOOL(FALSE) if login fails | OBJECT(user) if login succeeds
+	 */
 	public function login($username, $password, $stay_logged_in = false) {
 		if(strpos($username, "@") !== false) {
 			// checks email, not username
@@ -58,6 +89,15 @@ class Auth
 		return false;
 	}
 
+	/**
+	 * Trys to register a user
+	 * @param string $email user-email
+	 * @param string $username user-name
+	 * @param string $password user-password
+	 * @param string $password_verification password-verification
+	 * @param bool $captcha FALSE: Captcha is wrong -> used for errors 
+	 * @return mixed BOOL(TRUE) on success | ARRAY(errors) error-string on fail
+	 */
 	public function register_user($email, $username, $password, $password_verification = false, $captcha = NULL) {
 		
 		$error = $this->_validate_data(array(
@@ -101,6 +141,12 @@ class Auth
 		return true;
 	}
 
+	/**
+	 * Sends a registration-mail
+	 * @param string $email E-Mail of the receiver
+	 * @param string $username Username
+	 * @param string $activation_code The activation-code
+	 */
 	public function send_registration_email($email, $username, $activation_code) {
 		$this->_CI->load->library('template');
 		$this->_CI->load->library('email');
@@ -122,6 +168,11 @@ class Auth
 		$this->_CI->email->send();
 	}
 
+	/**
+	 * Gets a user-object if exists
+	 * @param int $id userid; if not int current viewing user will be returned
+	 * @return mixed BOOL(FALSE) if user does not exists or user is not logged in and $id was not int; | OBJECT(user-object)
+	 */
 	public function user($id = false) {
 		if(isint($id)) {
 			return $this->_CI->users_model->user($id);
@@ -138,6 +189,14 @@ class Auth
 		return false;
 	}
 
+	/**
+	 * Updates the user if the validation is correct
+	 * Only invalid data will not be updated. So if one is valid and another not only the invalid will not be updated.
+	 * @param array $data data-array which should be updated
+	 * @param int $id userid
+	 * @param array $validate_array array of what should be validated
+	 * @return mixed ARRAY(errors) if error are  occuring | BOOL(TRUE)
+	 */
 	public function update_user($data, $id = false, $validate_array = array('email', 'username', 'password', 'captcha')) {
 		$update_data = array();
 		$validate = array();
@@ -154,6 +213,10 @@ class Auth
 		return true;
 	}
 
+	/**
+	 * Checks if the user is logged in.
+	 * @return bool
+	 */
 	public function is_logged_in() {
 		if(isint($this->user_session())) return true;
 		$uid = $this->_CI->input->cookie('user_id');
@@ -164,10 +227,19 @@ class Auth
 		}
 		return false;
 	}
+
+	/**
+	 * Checks if the user is logged in.
+	 * @return bool
+	 */
 	public function logged_in() {
 		return $this->is_logged_in();
 	}
 
+	/**
+	 * Checks if a user session exists.
+	 * @return mixed INT(userid) if exists | BOOL(FALSE) if not
+	 */
 	public function user_session() {
 		$userid = $this->_CI->session->userdata('userid');
 		if(isint($userid) && $this->_CI->session->userdata('user_unique_id')) {
@@ -179,6 +251,9 @@ class Auth
 		return false;
 	}
 
+	/**
+	 * Logs the current user out and deletes all it cookies etc.
+	 */
 	public function logout() {
 		$this->_CI->session->unset_userdata(array('userid', 'user_unique_id'));
 		$this->_CI->session->sess_destroy();
@@ -197,6 +272,12 @@ class Auth
 		));
 	}
 
+	/**
+	 * Trys to activate a user
+	 * @param string $username username of the user which should be activated
+	 * @param string $activationcode The activation code needed to activate the user
+	 * @return bool TRUE: User already activated or is now activated | FALSE: user is not activated and activationcode is wrong OR user does not exist
+	 */
 	public function activate($username, $activationcode)
 	{
 		$this->_CI->load->model('user_activation_model');
@@ -210,14 +291,26 @@ class Auth
 		return false;
 	}
 
+	/**
+	 * Sets a session for the user
+	 * @param int $uid userid
+	 * @return bool FALSE: user does not exist | TRUE: session is set
+	 */
 	public function set_session($uid) {
 		if(!isint($uid)) return false;
 		$user = $this->user($uid);
+		if(!$user) return false;
 		$newdata = array('userid' => $uid, 'user_unique_id' => $user->unique_id);
 		$this->_CI->session->set_userdata($newdata);
 		return true;
 	}
 
+	/**
+	 * Returns not matching characters in a regex.
+	 * @param string $regex The regular expression.
+	 * @param string $text The string to be checked
+	 * @return array Array of each non-matching character
+	 */
 	private function _return_non_matching_characters($regex, $text) {
 		$array = array();
 		$text_length = strlen($text);
@@ -231,6 +324,12 @@ class Auth
 		return $array;
 	}
 
+	/**
+	 * Logs a user in (does not check password)
+	 * @param int $uid user-id
+	 * @param bool $stay_logged_in TRUE: user should stay logged in
+	 * @param int $expiration When should the stay_logged_in-cookie expire?
+	 */
 	private function _login($uid, $stay_logged_in = false, $expiration = false) {
 		if(!isint($expiration)) $expiration = $this->_stay_logged_in;
 		if(isint($uid)) {
@@ -264,6 +363,13 @@ class Auth
 		return true;
 	}
 
+	/**
+	 * Validated an data-array
+	 * @param array $d data-array
+	 * @param int $id user-id
+	 * @param array $validate_array the data which should be validated
+	 * @return array array of errors: $return['count'] will be 0 if no errors occur
+	 */
 	public function _validate_data($d, $id = false, $validate_array = array('email', 'username', 'password', 'captcha')) {
 		if(isint($id)) $user = $this->user($id);
 		else $user = false;
@@ -324,7 +430,14 @@ class Auth
 		return $error;
 	}
 
-	private function _validate_name($name, $ingame_name = false, &$error = array()) {
+	/**
+	 * Checks if a name is valid and adds error messages to $error
+	 * @param string $name The name to be checked
+	 * @param bool $ingame_name TRUE: $name should be validated as ingame_name, not as user_name
+	 * @param array &$error_array adds error messages if errors occur.
+	 * @return bool
+	 */
+	private function _validate_name($name, $ingame_name = false, &$error_array = array()) {
 		$error_messages = $this->_CI->config->item('error_messages');
 		$hit_disallowed_characters = array();
 		
@@ -384,6 +497,7 @@ class Auth
 			$error[$ep.'too_long'] = sprintf($error_messages[$ep.'too_long'], $maxlength, $this->_CI->config->item('username_min_length'));
 		}
 		if(count($error) == 0) return true;
+		array_merge($error, $error_array);
 		return false;
 	}
 }

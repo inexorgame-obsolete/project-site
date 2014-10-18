@@ -1,6 +1,9 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 class Pages extends CI_Controller {
 
+	/**
+	 * Magic Method __construct();
+	 */
 	public function __construct() {
 		parent::__construct();
 		$this->config->load('static_pages');
@@ -8,6 +11,10 @@ class Pages extends CI_Controller {
 		$this->template->add_css($this);
 	}
 
+	/**
+	 * Load static pages
+	 * @param string $page the page to load
+	 */
 	public function view($page = 'home') {
 		if($page == 'mail') $this->template->disable();
 		if(!file_exists(APPPATH.'/views/static/' . $page . '.php'))
