@@ -1,18 +1,45 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 class Fileinfo {
+
+	// Array of magic numbers for different filetypes
 	public $magicnumbers;
+
+	// Path to the file
 	public $filepath;
+
+	// Dir to the file
 	public $dir;
+
+	// Base name of the file
 	public $basename;
+
+	// Extension of the file
 	public $extension;
+
+	// Name of the file
 	public $filename;
+
+	// The codeigniter object
 	private $_CI;
+
+	// Maxlength of the file to read 
+	// -> so not everything of a big file needs to be loaded;
+	// -> only until the magic number ends
 	private $_maxlength;
+
+	// Content of the file (as HEX); only until $this->_maxlength is reached
 	private $_filecontent;
+
+	// Filesize in bytes
 	private $_filesize;
+
+	// FALSE: File was not initialized
 	private $_initalized = false;
 
+	/**
+	 * Magic Method __construct();
+	 */
 	public function __construct()
 	{
 		$this->_CI =& get_instance();
@@ -20,6 +47,9 @@ class Fileinfo {
 		$this->magicnumbers = $this->_CI->config->item('magicnumbers');
 	}
 
+	/**
+	 * Initialzes the file with $this->filepath;
+	 */
 	public function init()
 	{
 		if(!is_string($this->filepath)) throw new Exception("No file set.");
@@ -45,6 +75,10 @@ class Fileinfo {
 		$this->name = $pathinfo['filename'];
 	}
 
+	/**
+	 * Gets real filetype of the file
+	 * @param array $magicnumbers the array to check the filetype for. If not array it will check for all available in the config
+	 */
 	public function get_real_file_type($magicnumbers = false) {
 		$this->checkInit();
 		$results = array();
@@ -72,6 +106,11 @@ class Fileinfo {
 		return $results;
 	}
 
+	/**
+	 * Checks if a file is a filetype
+	 * @param array $types allowed types
+	 * @return array types matching the file or BOOL(FALSE)
+	 */
 	public function is_file_type($types) {
 		$this->checkInit();
 		if(is_string($types)) $types = (array) $types;
@@ -86,12 +125,21 @@ class Fileinfo {
 		return $result;
 	}
 
+	/**
+	 * Checks if a type is set in the config
+	 * @param string $type the file type
+	 * @return bool
+	 */
 	public function check_type_available($type) {
 		$this->checkInit();
 		if(isset($this->magicnumbers[$type])) return true;
 		return false;
 	}
 
+	/**
+	 * Checks if a type matches its extension
+	 * @return array types matching the file or BOOL(FALSE)
+	 */
 	public function type_matches_extension() {
 		$this->checkInit();
 		if($this->check_type_available($this->extension) == false) {
@@ -100,14 +148,26 @@ class Fileinfo {
 		return $this->is_file_type($this->extension);
 	}
 
+	/**
+	 * Returns filesize of file
+	 * @return int filesize in bytes
+	 */
 	public function filesize() {
 		return $this->_filesize;
 	}
 
+	/**
+	 * Checks if file is already initialized and initializes it if not.
+	 */
 	private function checkInit() {
 		if($this->_initalized == false || $this->_initalized != $this->filepath) $this->init();
 	}
 
+	/**
+	 * Returns the longest matching magic number (in bytes)
+	 * @param bool $including_offste Include offset to the length or not
+	 * @return int magic-number in bytes
+	 */
 	private function getLongestMagicNumber($including_offset = true) {
 		$longest = 0;
 		foreach($this->magicnumbers as $k => $v) {

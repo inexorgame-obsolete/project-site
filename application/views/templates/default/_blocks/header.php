@@ -8,6 +8,9 @@
 	<?php
 		dcss('style');
 		dcss('OpenSans');
+		dcss('medium-device', '(max-width: 960px)');
+		dcss('small-device', '(max-width: 800px)');;
+		dcss('mini-device', '(max-width: 600px)');
 	?>
 	<script src="<?=js('jquery')?>"></script>
 	<script src="<?=js('bg-pointer')?>"></script>
@@ -20,8 +23,36 @@
 	{head}
 </head>
 <body>
+<?php if ($logged_in !== false): ?>
+	<ul id="users-nav">
+		<li class="user-profile">
+			<a href="#closer" class="right">
+				<span class="avatar" style="background-image:url(<?=avatar_image($user['id'])?>);"></span>
+			</a>
+			<a class="profile-name" href="<?=site_url('user/'.$user['id'])?>"><?=showname($user);?></a>
+			<div class="clear"></div>
+		</li>
+		<?php foreach($menu_links as $m): ?>
+			<?php if($m->link != NULL && count($m->childs) == 0): ?>
+				<li><a class="item" href="<?=site_url($m->link)?>"><?=$m->name?></a></li>
+			<?php else: ?>
+				<li class="headline">
+				<?php if($m->link != NULL) : ?>
+					<a class="item" href="<?=site_url($m->link)?>"><?=$m->name?></a>
+				<?php else: ?>
+					<?=$m->name?>
+				<?php endif; ?>
+				</li>
+			<?php endif; ?>
+			<?php foreach($m->childs as $c) : ?>
+				<li><a class="item" href="<?=site_url($c->link)?>"><?=$c->name?></a></li>
+			<?php endforeach; ?>
+		<?php endforeach; ?>
+	</ul>
+<?php endif; ?>
 	<a id="closer"></a>
 	<div id="loader"><div></div></div>
+<?php if ($logged_in !== false): ?>
 	<div id="browse-data" class="hidden">
 		<div class="browse-data close background"></div>
 		<div class="browse-data window">
@@ -50,11 +81,13 @@
 					<div class="browse-data messages"></div>
 				</div>
 			</div>
-		</div></div>
+		</div>
+	</div>
+<?php endif; ?>
 	<header>
 		<div class="border menu">
 			<div class="helper">
-				<a href="<?=site_url()?>"><img src="<?=image('logo_small.png'); ?>" alt="sauerfork" /></a>
+				<a href="<?=site_url()?>"><img src="<?=image('logo_small.png'); ?>" alt="{sitetitle}" /></a>
 				<span class="title"><a href="<?=site_url()?>">{sitetitle}</a></span>
 			</div>
 			<ul id="main-menu">
@@ -64,14 +97,19 @@
 				<li><a href="<?=site_url('blog')?>">Blog</a></li>
 			</ul>
 			<?php if ($logged_in === false): ?>
-
+				<div class="user-showcase">
+					<?=form_open('user/login');?>
+						<input type="text" name="username_email" placeholder="E-Mail or Username" />
+						<input type="password" name="password" placeholder="Password" /><br />
+						<div class="right">
+							<label for="stay_logged_in_quick_login">Stay logged in </label><input type="checkbox" checked="checked" name="stay_logged_in" id="stay_logged_in_quick_login" />
+							<input type="submit" name="submit" value="Login" />
+						</div>
+					<?=form_close();?>
+				</div>
 			<?php else: ?>
 			<div class="user-showcase">
-				<div class="links">
-					<a href="<?=site_url('user/'.$user['id'])?>"><?=showname($user);?></a><br />
-					<a href="<?=site_url('user/edit')?>">Edit profile</a> | <a href="<?=site_url('auth/logout')?>">Logout</a>
-				</div>
-				<a href="<?=site_url('user/'.$user['id'])?>"><span class="avatar" style="background-image:url(<?=avatar_image($user['id'])?>);"></span></a>
+				<a href="#users-nav"><span class="avatar" style="background-image:url(<?=avatar_image($user['id'])?>);"></span></a>
 			</div>
 			<?php endif; ?>
 			<div class="clear"></div>

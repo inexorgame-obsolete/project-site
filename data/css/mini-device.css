@@ -1,0 +1,14 @@
+#change_background_picture {
+	margin-top: 0;
+	border: 1px solid #CCC;
+	border-radius: 3px;
+	margin-left: 10px;
+}
+#change_background_picture input {
+	display: block;
+	width: 100%;
+	margin-bottom: 10px;
+}
+footer > .content > section {
+	width: 100%;
+}

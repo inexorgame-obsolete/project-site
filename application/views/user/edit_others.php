@@ -13,20 +13,23 @@
 				<?=form_input($change_picture['profile']['delete']);?>
 			<?=form_close();?>
 		</div>
-		<a href="<?=site_url("permissions/user/" . $edit_user->id . "/overview");?>">Edit this users permissions</a>
+		<a href="<?=site_url("permission/user/" . $edit_user->id . "/");?>">Edit this users permissions</a>
 	</div>
-	<div class="small-content">
-		<h1 class="text-contrast in-eyecatcher"><?=showname($edit_user)?></h1>
-		<div class="message<?php if(!isset($form_validation['messages']) || count($form_validation['messages']) == 0) echo ' hidden'; ?>"><div class="container">
-			<?php if(isset($form_validation['messages']) && count($form_validation['messages']) > 0) foreach($form_validation['messages'] as $m): ?>
+	<div id="user-info">
+		<h1 class="text-contrast"><?=showname($edit_user)?></h1>
+		<div class="message<?php if(!isset($errors['messages']) || count($errors['messages']) == 0) echo ' hidden'; ?>"><div class="container">
+			<?php if(isset($errors['messages']) && count($errors['messages']) > 0) foreach($errors['messages'] as $m): ?>
 				<p><?=$m?></p>
 			<?php endforeach; ?>
 		</div></div>
-		<?=form_open('user/edit/' . $edit_user->id);?>
-			<?php /* <div class="user-edit-item">
-				<?=form_label('E-Mail', $edit_form['email']['id']);?>
-				<?=p_r(form_input($edit_form['email']));?>
-			</div> */ ?>
+		<?=form_open(NULL, array('autocomplete' => 'off'));?>
+			<!-- Workaround for Chromes autofill "feature" which still autocompletes when autocomplete is off. -->
+			<input style="display:none;" type="text" name="__username_workaround"/>
+			<input style="display:none;" type="password" name="__password_workaround"/>
+			<div class="user-edit-item">
+				<?=form_label('Active', $edit_form['active']['id']);?>
+				<?=p_r(form_input($edit_form['active']));?>
+			</div>
 			<div class="user-edit-item">
 				<?=form_label('E-Mail', $edit_form['email']['id']);?>
 				<?=p_r(form_input($edit_form['email']));?>

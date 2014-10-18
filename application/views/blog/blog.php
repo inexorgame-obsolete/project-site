@@ -5,19 +5,9 @@
 	<?php $creator = $creators[$entry['user_id']]; ?>
 <div class="blog-centered">
 	<h1><a href="<?=site_url('blog/view/' . $entry['id'])?>"><?=d($entry['headline'])?></a></h1>
-	<?php
-		$post = explode('<!-- pagebreak -->', create_blog_post_from_array($entry['body'], $entry['id']));
-		echo $post[0];
-		$post_overflow = false;
-		if(isset($post[1])) {
-			$post_overflow = true;
-		}
-	?>
+	<?=create_blog_post_from_array($entry['body'], $entry['id'], true);?>
 	<ul class="vertical-nav">
-	<?php if($post_overflow) : ?>
-		<li><a href="<?=site_url('blog/view/' . $entry['id'])?>">Read full post</a></li><?php 
-	endif; 
-	?><li><a href="<?=site_url('blog/view/' . $entry['id']) . '#comments'?>">Comments</a></li><?php 
+		<li><a href="<?=site_url('blog/view/' . $entry['id'])?>">View post</a></li><li><a href="<?=site_url('blog/view/' . $entry['id']) . '#comments'?>">Comments</a></li><?php 
 	if($user_edit_others || $user_may_release) : 
 	?><li><a href="<?=site_url('blog/edit/' . $entry['id'])?>">Edit post</a></li><?php
 	endif; ?>

@@ -1,6 +1,6 @@
 <?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-$config['require_email_verification'] = false;	// Require E-Mail verification - currently not implemented
+$config['require_email_verification'] = true;	// Require E-Mail verification - currently not implemented
 $config['username_disallowed_characters'] = array('@', ' ');
 $config['username_regex'] = '/(.*)/';
 $config['username_min_length'] = 1;				// Max length is DB-field-size.

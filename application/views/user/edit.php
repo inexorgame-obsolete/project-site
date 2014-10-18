@@ -6,15 +6,18 @@
 			--><?=form_input($change_picture['background']['delete']);?><!--
 		--><?=form_close();?><!--
 	--></div>
-	<div id="profile_picture">
-		<div class="picture" style="background-image:url(<?=avatar_image($user->id)?>);"></div>
-	</div>
-	<div id="change_profile_picture">
-		<?=form_open_multipart('user/edit/picture/profile', array('class' => 'ajax-upload'));?>
-			<?=form_input($change_picture['profile']['upload']);?>
-			<?=form_input($change_picture['profile']['submit']);?>
-			<?=form_input($change_picture['profile']['delete']);?>
-		<?=form_close();?>
+	<div class="left-bar prevent-eyecatcher">
+		<div id="profile_picture">
+			<div class="picture" style="background-image:url(<?=avatar_image($user->id)?>);"></div>
+		</div>
+		<div id="change_profile_picture">
+			<div class="clear"></div>
+			<?=form_open_multipart('user/edit/picture/profile', array('class' => 'ajax-upload'));?>
+				<?=form_input($change_picture['profile']['upload']);?>
+				<?=form_input($change_picture['profile']['submit']);?>
+				<?=form_input($change_picture['profile']['delete']);?>
+			<?=form_close();?>
+		</div>
 	</div>
 	<div id="user-info">
 		<h1 class="text-contrast"><?=showname($user)?></h1>
@@ -23,7 +26,7 @@
 				<p><?=$m?></p>
 			<?php endforeach; ?>
 		</div></div>
-		<?=form_open('user/edit');?>
+		<?=form_open(NULL, array('autocomplete' => 'off'));?>
 			<?php /* <div class="user-edit-item">
 				<?=form_label('E-Mail', $edit_form['email']['id']);?>
 				<?=p_r(form_input($edit_form['email']));?>

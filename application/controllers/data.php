@@ -1,8 +1,15 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 class Data extends CI_Controller {
 
+	// Current user trying to view the files
 	var $user 	= FALSE;
+
+	// Owner of the files
 	var $owner 	= FALSE;
+
+	/**
+	 * Magic Method __construct()
+	 */
 	public function __construct() {
 		parent::__construct();
 		$this->load->library('auth');
@@ -11,6 +18,12 @@ class Data extends CI_Controller {
 		$this->load->library('template');
 	}
 
+	/**
+	 * JSON-Api for JS-data-viewer
+	 * @param string $command the command to be executed; Will (if allowed) execute $this->_api_<$command> default: list
+	 * @param int $ownerid id of the owner of the files; default: userid
+	 * @return type
+	 */
 	public function api($command = FALSE, $ownerid = FALSE) {
 		$this->user = $this->auth->user();
 		$this->output->set_content_type('application/json');
@@ -58,6 +71,9 @@ class Data extends CI_Controller {
 
 	}
 
+	/**
+	 * Displays json-object of dir-content; recursive
+	 */
 	private function _api_list()
 	{
 		$output = array(
@@ -71,11 +87,17 @@ class Data extends CI_Controller {
 		$this->output->set_output(json_encode($output));
 	}
 
+	/**
+	 * Creates subdir in the user-folder if user has enough left.
+	 */
 	private function _api_createdir()
 	{
 		$this->output->set_output(json_encode($this->data_lib->create_sub_dir($this->input->post('dir'), $this->input->post('parent_dirs'))));
 	}
 	
+	/**
+	 * redirects to $this->_api_uploda_<$type>; $type is submitted via form
+	 */
 	private function _api_upload()
 	{
 		$type = $this->input->post('type');
@@ -94,6 +116,9 @@ class Data extends CI_Controller {
 		}
 	}
 
+	/**
+	 * Allows to upload images only
+	 */
 	private function _api_upload_image()
 	{
 		$this->data_lib->set_file($_FILES['file']);
@@ -131,6 +156,9 @@ class Data extends CI_Controller {
 		}
 	}
 
+	/**
+	 * Upload files; Currently only images
+	 */
 	private function _api_upload_file()
 	{
 		$this->_api_upload_image();

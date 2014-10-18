@@ -1,22 +1,43 @@
 <?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 class Pgroups_permissions_model extends CI_Model {
 
+	// The table in the database
 	private $_table = 'pgroups_permissions';
+
+	/**
+	 * Magic Method __construct();
+	 */
 	public function __construct() {
 		parent::__construct();
 		$this->load->database();
 	}
 
+	/**
+	 * Gets all permission-id by group-id
+	 * @param int $id group-id
+	 * @return array containing objects
+	 */
 	public function get_permissions_by_group($id) {
 		$query = $this->db->get_where($this->_table, array('pgroup_id' => $id));
 		return $query->result_array();
 	}
 
+	/**
+	 * Gets all groups which have set this permission
+	 * @param int $id permission-id
+	 * @return array containing objects
+	 */
 	public function get_permission($id) {
 		$query = $this->db->get_where($this->_table, array('permissions_id' => $id));
 		return $query->result_array();
 	}
 
+	/**
+	 * Checks if a group has a permission
+	 * @param int $groupid group-id
+	 * @param int $permissionid permission-id
+	 * @return mixed INT(0) if is not set in the table; BOOL if is set (TRUE if group has the permission; else FALSE)
+	 */
 	public function has_group_permission($groupid, $permissionid) {
 		$query = $this->db->get_where($this->_table, array('pgroup_id' => $groupid, 'permissions_id' => $permissionid));
 		if($query->num_rows() === 1)
@@ -33,12 +54,26 @@ class Pgroups_permissions_model extends CI_Model {
 		}
 	}
 
+	/**
+	 * Updates an entry value
+	 * @param int $gid group-id
+	 * @param int $pid permission-id
+	 * @param bool $value The new value
+	 * @return The Active-record query-return
+	 */
 	public function update($gid, $pid, $value) {
 		$this->db->where('pgroup_id', $gid);
 		$this->db->where('permissions_id', $pid);
 		return $this->db->update($this->_table, array('value' => $value));
 	}
 
+	/**
+	 * Inserts a new entry
+	 * @param int $gid group-id
+	 * @param int $pid permission-id
+	 * @param bool $value The value (Whether a group has the permission)
+	 * @return The Active-record query-return
+	 */
 	public function insert($gid, $pid, $value) {
 		return $this->db->insert($this->_table, array(
 			'pgroup_id' => $gid,
@@ -47,20 +82,40 @@ class Pgroups_permissions_model extends CI_Model {
 		));
 	}
 
+	/**
+	 * Checks if a permission is specifically set for a group
+	 * @param int $gid group-id
+	 * @param int $pid permission-id
+	 * @return bool
+	 */
 	public function exists($gid, $pid) {
 		$this->db->where('pgroup_id', $gid);
 		$this->db->where('permissions_id', $pid);
 		$this->db->limit(1, 0);
-		return $this->db->get($this->_table)->row();
+		if($this->db->get($this->_table)->num_rows() > 0) return true;
+		return false;
 	}
 
+	/**
+	 * Deletes an entry based on group and permission
+	 * @param int $gid group-id
+	 * @param int $pid permission-id
+	 */
 	public function delete($gid, $pid) {
 		$this->db->where('pgroup_id', $gid);
 		$this->db->where('permissions_id', $pid);
 		$this->db->delete($this->_table);
-		return true;
 	}
 
+	/**
+	 * Checks if a group has multiple permissions
+	 * @param int $group group-id
+	 * @param array $permissions the needed permissions
+	 * @param array &$permissions_array the results for the permissions
+	 * @return mixed 
+	 * -> ARRAY(permissions) permissions which are still needed and not set in the DB
+	 * -> BOOL
+	 */
 	public function group_has_permissions($group, $permissions, &$permissions_array = array()) {
 		return $this->groupset_have_permissions(array($group), $permissions, $permissions_array);
 	}
@@ -96,7 +151,12 @@ class Pgroups_permissions_model extends CI_Model {
 		return $permissions;
 	}
 
-
+	/**
+	 * Sets a permission for a group
+	 * @param int $groupid group-id
+	 * @param int $permissionid permission-id
+	 * @param bool $value The value whether the group has the permission
+	 */
 	public function set_group_permission($groupid, $permissionid, $value) {
 		if($value == true) $value = true;
 		else $value = false;

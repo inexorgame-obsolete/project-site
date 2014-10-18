@@ -1,6 +1,9 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 class Blog extends CI_Controller {
 
+	/**
+	 * Magic Method __construct()
+	 */
 	public function __construct() {
 		parent::__construct();
 		$this->load->library('Config_validations', array('data'));
@@ -15,8 +18,13 @@ class Blog extends CI_Controller {
 		$this->load->library('auth');
 
 		$this->load->library('template');
+		$this->template->add_css($this);
 	}
 
+	/**
+	 * Index blog site
+	 * @param int $site pagination-site
+	 */
 	public function index($site = 1)
 	{
 		if($site != isint($site)) $site = 1;
@@ -52,6 +60,10 @@ class Blog extends CI_Controller {
 		$this->load->view('blog/blog', $data);
 	}
 
+	/**
+	 * View of single blog entry
+	 * @param string $slug blog slug
+	 */
 	public function view($slug = false)
 	{
 		if(!$slug)
@@ -94,7 +106,12 @@ class Blog extends CI_Controller {
 		$this->load->view('blog/view', $data);
 	}
 
+	/**
+	 * Blog entry creator
+	 * @param string $subblog Subblog-name for multiple blogs, not implemented yet
+	 */
 	public function create($subblog = 'main') {
+		$this->template->add_css('data');
 
 		$user = $this->auth->user();
 		
@@ -195,6 +212,10 @@ class Blog extends CI_Controller {
 		$this->load->view('blog/create', $data);
 	}
 
+	/**
+	 * Creation-form-data
+	 * @param bool $allow_enable adds the enable-checkbox on true
+	 */
 	private function _get_create_form_data($allow_enable = FALSE) 
 	{
 		$data['form'] = array('data-create' => 'form');
@@ -254,6 +275,12 @@ class Blog extends CI_Controller {
 		return $data;
 	}
 
+	/**
+	 * Remaps the requests for this controller
+	 * @param mixed $method is used as pagination when integer, else normal url-mapping
+	 * @param type $params 
+	 * @return type
+	 */
 	public function _remap($method, $params)
 	{
 		if($method == isint($method))

@@ -1,7 +1,12 @@
 <?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 class Blog_model extends CI_Model
 {
+	// The table in the database
 	private $_table = 'blog';
+
+	/**
+	 * Magic Method __construct();
+	 */
 	public function __construct()
 	{
 		parent::__construct();
@@ -10,18 +15,36 @@ class Blog_model extends CI_Model
 		$this->_user = $this->auth->user();
 	}
 
+	/**
+	 * Gets a post by its id 
+	 * @param int $id blog-post-id
+	 * @return object blog-post
+	 */
 	public function get_by_id($id)
 	{
 		$query = $this->db->get_where($this->_table, array('id' => $id));
 		return $query->row();
 	}
 
+	/**
+	 * Gets a post by its slug
+	 * @param string $slug The slug (abbreviation) of the post
+	 * @return object blog-post
+	 */
 	public function get_by_slug($slug)
 	{
 		$query = $this->db->get_where($this->_table, array('slug' => $slug));
 		return $query->row();
 	}
 
+	/**
+	 * Gets multiple posts for a user (so a user can view his own entrys when they are not published)
+	 * @param int $userid user-id
+	 * @param int $posts posts per site
+	 * @param int $start offset
+	 * @param bool $is_admin Return non-published posts as well
+	 * @return array containing objects of blog-posts
+	 */
 	public function get_posts_for_user($userid = false, $posts = 10, $start = 0, $is_admin = false)
 	{
 		if($posts < 0 || $posts === false || $posts != (string) (int) $posts) $posts = 10;
@@ -36,6 +59,13 @@ class Blog_model extends CI_Model
 		return $query->result_array();
 	}
 
+	/**
+	 * Returns how high the maximum pagination according to the posts per site is
+	 * @param int $posts posts per site
+	 * @param bool $userid user-id
+	 * @param bool $is_admin Count non-published posts as well
+	 * @return int max-pagination
+	 */
 	public function max_pagination($posts = 10, $userid = false, $is_admin = false)
 	{
 		if($posts < 0 || $posts === false || $posts != (string) (int) $posts) $posts = 10;
@@ -49,6 +79,14 @@ class Blog_model extends CI_Model
 		return ceil($query->num_rows() / $posts);
 	}
 
+	/**
+	 * Inserts a blog post
+	 * @param string $headline Headline of the post
+	 * @param string $body The body-string (normally serialized)
+	 * @param bool $enabled Whether the post is published
+	 * @param string $slug The post slug (URL-abbreviation)
+	 * @return string slug
+	 */
 	public function insert($headline, $body, $enabled, $slug = FALSE)
 	{
 		if($slug == FALSE) $slug = $headline;
@@ -67,6 +105,11 @@ class Blog_model extends CI_Model
 		return $this->db->get($this->_table)->row()->slug;
 	}
 
+	/**
+	 * Creates a slug from a string
+	 * @param string $string The string to create the slug from
+	 * @return string The slug
+	 */
 	public function create_slug($string)
 	{
 		$slug = strip_tags($string);

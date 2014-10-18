@@ -1,8 +1,12 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 
 class User extends CI_Controller {
+	// The data submitted to the views if _render_page is used and no data is submitted
 	public $viewdata;
 
+	/**
+	 * Magic Method __construct();
+	 */
 	function __construct()
 	{
 		parent::__construct();
@@ -16,8 +20,12 @@ class User extends CI_Controller {
 		$this->load->library('permissions');
 		$this->load->library('reCaptcha');
 		$this->load->library('template');
+		$this->template->add_css($this);
 	}
 
+	/**
+	 * Index of the page containing a login-form and a register-link
+	 */
 	function index()
 	{
 		$this->form_validation->set_rules('search', 'search field', 'xss_clean|required');
@@ -33,6 +41,26 @@ class User extends CI_Controller {
 		}
 	}
 
+	/**
+	 * Activates the user if $username and $verification matches
+	 * @param string $username Username to be acivated
+	 * @param string $verification The verification-code of the user containing 128 lower-/uppercase letters and numbers
+	 */
+	function activate($username = false, $verification = false)
+	{
+		if($username && $verification)
+		if($this->auth->activate(urldecode($username), $verification))
+		{
+			$this->_render_page('user/activation', array('success' => true));
+			return;
+		}
+		$this->_render_page('user/activation', array('success' => false));
+	}
+
+	/**
+	 * Login page
+	 * @param string $site The site to be redirected to if is set | NOT IMPLEMENTED
+	 */
 	function login($site = false) {
 		if($user = $this->auth->user()) redirect('user/' . $user->id);
 		$data = $this->_get_login_form();
@@ -48,11 +76,19 @@ class User extends CI_Controller {
 		$this->_render_page('user/login', $data);
 	}
 
-	function logout() {
+	/**
+	 * Logs the user out
+	 * @param bool $redirected Reload the page so all parts are rendered again without logged in
+	 */
+	function logout($redirected = false) {
 		$this->auth->logout();
+		if($redirected === false) redirect('user/logout/true');
 		$this->_render_page('user/logout');
 	}
 
+	/**
+	 * Register a user
+	 */
 	function register()
 	{
 		$this->template->set_title("Create User");
@@ -78,6 +114,10 @@ class User extends CI_Controller {
 		$this->_render_page('user/register', $this->data);
 	}
 
+	/**
+	 * Search for a user
+	 * @param string $string the searchstring
+	 */
 	function search($string = false)
 	{
 		$string = urldecode($string);
@@ -104,6 +144,10 @@ class User extends CI_Controller {
 		$this->_render_page('user/list', $data);
 	}
 
+	/**
+	 * View a user
+	 * @param int $id the userid
+	 */
 	function view($id = NULL)
 	{
 		$user = $this->auth->user();
@@ -125,6 +169,12 @@ class User extends CI_Controller {
 		$this->_render_page('user/view_user', $data);
 	}
 
+	/**
+	 * Edit a user
+	 * @param mixed $slug Used as command-recognition; If int it will be used as userid else it will execute special functions for ajax-usage
+	 * @param mixed $value Value for the command
+	 * @param bool $ajax will output json on true
+	 */
 	function edit($slug = false, $value = false, $ajax = false) {
 		$user = $this->auth->user();
 		if($user == false) {
@@ -223,7 +273,8 @@ class User extends CI_Controller {
 				'edit_others_about',
 				'edit_others_password',
 				'delete_others_profile_picture',
-				'delete_others_background_picture'
+				'delete_others_background_picture',
+				'change_activation_status'
 			), false, true);
 			$this->_get_edit_others_data($data, $edit_user, $permissions_array);
 
@@ -231,11 +282,13 @@ class User extends CI_Controller {
 				$update_data = array();
 				$validate_array = array();
 				$this->_update_if_allowed($update_data, $data['edit_form']['username'], 'username', $validate_array);
-				$this->_update_if_allowed($update_data, $data['edit_form']['password'], 'password', $validate_array);
 				$this->_update_if_allowed($update_data, $data['edit_form']['password_verification'], 'password_verification', $validate_array);
+				if(isset($update_data['password_verification']))
+					$this->_update_if_allowed($update_data, $data['edit_form']['password'], 'password', $validate_array);
 				$this->_update_if_allowed($update_data, $data['edit_form']['email'], 'email', $validate_array);
 				$this->_update_if_allowed($update_data, $data['edit_form']['about'], 'about', $validate_array);
 				$this->_update_if_allowed($update_data, $data['edit_form']['ingame_name'], 'ingame_name', $validate_array);
+				$this->_update_if_allowed($update_data, $data['edit_form']['active'], 'active', $validate_array);
 
 				$errors = $this->auth->update_user($update_data, $edit_user->id, $validate_array);
 
@@ -281,7 +334,7 @@ class User extends CI_Controller {
 				if($update_data['ingame_name'] == $user->ingame_name) 		unset($update_data['ingame_name']);
 
 				if($this->auth->check_password_id($user->id, $this->input->post($data['edit_form']['old_password']['name']))) {
-					$errors = $this->auth->update_user($update_data);
+					$errors = $this->auth->update_user($update_data, false, array_keys($update_data));
 					$data['form_validation'] = array('success' => TRUE);
 					if($errors['count'] > 0) {
 						$data['form_validation']['errors'] = TRUE;
@@ -303,6 +356,10 @@ class User extends CI_Controller {
 		}
 	}
 
+	/**
+	 * Get form data for the register form
+	 * @return array form-data
+	 */
 	private function _get_register_form() {
 		$data['username'] = array(
 			'name'  => 'username',
@@ -332,6 +389,10 @@ class User extends CI_Controller {
 		return $data;
 	}
 
+	/**
+	 * Get form data for the login form
+	 * @return array form-data
+	 */
 	private function _get_login_form() {
 		$data['username_email'] = array(
 			'name'  => 'username_email',
@@ -356,6 +417,13 @@ class User extends CI_Controller {
 		return $data;
 	}
 
+	/**
+	 * Renders the page
+	 * @param string $view the view to render
+	 * @param array $data the data to pass to the view
+	 * @param bool $render FALSE: Direct output 
+	 * @return mixed NULL when $render true; string when $render false
+	 */
 	function _render_page($view, $data=null, $render=false)
 	{
 		if(!empty($data)) $this->viewdata = $data;
@@ -363,6 +431,11 @@ class User extends CI_Controller {
 		if (!$render) return $view_html;
 	}
 
+	/**
+	 * Remaps the site
+	 * @param string $method the method to be executed
+	 * @param array $params the params to pass to the function
+	 */
 	function _remap($method, $params)
 	{
 		if(method_exists($this, $method))
@@ -381,6 +454,11 @@ class User extends CI_Controller {
 		}
 	}
 
+	/**
+	 * Adds edit-form-data to the data array
+	 * @param array &$data the data array to add the form-array to
+	 * @param object $user the object of the user which should be edited
+	 */
 	private function _get_edit_data(&$data, $user) {
 		$data['edit_form']['username'] = array(
 			'type' => 'text',
@@ -464,7 +542,22 @@ class User extends CI_Controller {
 		);
 	}
 
+	/**
+	 * Adds edit-form-data to the data array (to edit OTHER users)
+	 * @param array &$data the data array to add the form-array to
+	 * @param object $user the object of the user which should be edited
+	 * @param array $permissions the permissions which the user do (not) have to properly disable the field.
+	 */
 	private function _get_edit_others_data(&$data, $user, $permissions) {
+		$data['edit_form']['active'] = array(
+			'type' => 'checkbox',
+			'name' => 'active',
+			'id' => 'activate_user',
+			'value' => 'true',
+		);
+		if($user->active == true) $data['edit_form']['active']['checked'] = 'checked';
+		if(!$permissions['change_activation_status']) $this->_add_disabled($data['edit_form']['active']);
+
 		$data['edit_form']['email'] = array(
 			'type' => 'text',
 			'value' => $user->email,
@@ -539,14 +632,28 @@ class User extends CI_Controller {
 		);
 		if(!$permissions['delete_others_background_picture']) { $this->_add_disabled($data['change_picture']['background']['delete']); }
 	}
+
+	/**
+	 * Adds disabled to an input and adds a title that the user does not have the permissions
+	 * @param array &$data The input-array
+	 */
 	private function _add_disabled(&$data) {
 		$data['disabled'] = 'disabled';
 		$data['title'] = 'You are not allowed to edit this field.';
 	}
 
+	/**
+	 * Checks if a user has the permission to update a submitted value
+	 * @param array &$update the update array
+	 * @param array $input the input of the submitted update-data-form
+	 * @param string $index The index which should be set if the user has the permissions
+	 * @param array &$validate_array An array which will return the valid data indices
+	 */
 	private function _update_if_allowed(&$update, $input, $index, &$validate_array = array()) {
+		if(strlen($this->input->post($input['name'])) == 0 && $input['type'] != 'checkbox') return false;
 		if(!isset($input['disabled'])) { 
-			$update[$index] = $this->input->post($input['name']);
+			if(isset($input['type']) && $input['type'] == 'checkbox') $update[$index] = $this->input->post($input['name']) ? 1 : 0;
+			else $update[$index] = $this->input->post($input['name']);
 			$validate_array[] = $index;
 			return true; 
 		}

@@ -16,6 +16,7 @@
 <div class="centered">
 <?php $lastchar = substr($user->username, strlen($user->username)-1); ?>
 	<h1 class="text-contrast in-eyecatcher"><?=ph($user->username)?>'<?php if($lastchar != 'z' && $lastchar != 's') echo 's'; ?> groups</h1>
+	<a href="<?=site_url('permission/user/' . $user->id . '/');?>" class="full-width link-button">Go to this users permissions</a>
 	<?php if($add_form): ?>
 		<?php if($add_group_error): ?>
 			<h2>Error</h2>

@@ -1,11 +1,3 @@
-<?php
-	function get_youtube_links($message) {
-		// youtube regex /(?:(?:http?s:)?(?:\/\/)?(?:www\.)?youtu(?:be\.com\/watch(?:.\W*v\=)|\.be\/)([^&\n\t\f\s\r]*))/i
-		$youtube_regex = '/(?:(?:http?s:)?(?:\/\/)?(?:www\.)?youtu(?:be\.com\/watch(?:.\W*v\=)|\.be\/)([^&\n\t\f\s\r]*))/i';
-		preg_match_all($youtube_regex, $message, $matches);
-		return $matches[1];
-	}
-?>
 <div class="centered">
 	<h1 class="text-contrast in-eyecatcher">Activity Log</h1>
 	<?php if($may_submit) : ?>
@@ -32,7 +24,7 @@
 		<div class="spotlight">
 			<a href="<?=base_url();?>user/<?=$p['user']->id?>" class="full"><div class="avatar" style="background-image:url(<?=avatar_image($p['user']->id)?>);"></div><?=showname($p['user'], 'user one-line')?><span class="date" title="<?=tm($p['timestamp'])?>"><?=dt($p['timestamp'])?></span></a>
 			<div class="topics">
-				<?=nl2br(ph($p['changes']))?>
+				<?=nl2br(link_links(ph($p['changes'])))?>
 			</div>
 			<?php foreach($youtube as $y) : ?>
 				<div class="youtube-container">

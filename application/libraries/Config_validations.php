@@ -1,9 +1,21 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
-
+/**
+ * Validates configs set in the constructor
+ * For example needed to replace variables etc.
+ * If the config contains something like site_url() or FCPATCH
+ */
 class Config_validations {
+	// The codeigniter object
 	private $_CI;
-	private $_validate_all_blacklist = array('__construct', 'validate_all');	// Functions which should not be executed on validate_all.
 
+	// Functions which should not be executed on validate_all.
+	private $_validate_all_blacklist = array('__construct', 'validate_all');	
+
+	/**
+	 * Magic Method __construct();
+	 * Validates all configs submitted in $validate if a validation therefore exists.
+	 * @param mixed $validate BOOL(FALSE) will not validate any libraries, just construct | ARRAY(configs) will validate all configs set in the array
+ 	 */
 	public function __construct($validate = false) 
 	{
 		$this->_CI =& get_instance();
@@ -21,6 +33,9 @@ class Config_validations {
 		}
 	}
 
+	/**
+	 * Validates all configs (that have a function in this class)
+	 */
 	public function validate_all()
 	{
 		$methods = get_class_methods($this);
@@ -32,6 +47,9 @@ class Config_validations {
 		}
 	} 
 
+	/**
+	 * Validates the data-config
+	 */
 	public function validate_data()
 	{
 		$this->_CI->load->config('data', TRUE);

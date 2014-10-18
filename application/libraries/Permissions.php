@@ -1,13 +1,17 @@
 <?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 class Permissions {
-
+	// The codeigniter object
 	private $_CI;
+
+	// The userid to check the permissions for
 	private $_userid;
+
+	// The groupid to check the permissions for
 	private $_groupid;
-	private $_permissions = array();
-	private $_permission_names = array();
-	private $_user_permissions = array();
-	private $_group_permissions = array();
+
+	/**
+	 * Magic Method __construct();
+	 */
 	public function __construct() {
 		$this->_CI =& get_instance();
 		$this->_CI->load->model('permissions_model');
@@ -30,74 +34,22 @@ class Permissions {
 	}
 
 	public function has_user_permission($permission, $id = false, &$by = false) {
-		$by = 'u';
+		$by = 'd';
 		if(!isint($id)) $id = $this->_userid;
 		if($id != false) {
 			$permission = $this->_get_permission($permission);
-			if(isset($this->_user_permissions[$id][$permission->id])) {
-				$by = $this->_user_permissions[$id][$permission->id]['by'];
-				return $this->_user_permissions[$id][$permission->id]['value'];
-			}
 			$required_permissions = $this->get_all_parents($permission->id);
 			$required_permissions[] = (int) $permission->id;
 
-			// Check if permissions are directly assigned to user
-			foreach($required_permissions as $i => $p) {
-				$has_user_permission = $this->_CI->users_permissions_model->has_user_permission($id, $p);
-				if($has_user_permission === false) { 
-					$this->_user_permissions[$id][$p]['value'] = false;
-					$this->_user_permissions[$id][$p]['by'] = $by;
-					$this->_user_permissions[$id][$permission->id]['value'] = false;
-					$this->_user_permissions[$id][$permission->id]['by'] = $by;
-					return false; 
-				}
-				elseif($has_user_permission === true) 
-				{
-					$this->_user_permissions[$id][$p]['value'] = true;
-					$this->_user_permissions[$id][$p]['by'] = $by;
-					unset($required_permissions[$i]);
-				}
-			}
-			if(count($required_permissions) == 0) 
+			foreach($required_permissions as $rp)
 			{
-				$this->_user_permissions[$id][$permission->id]['value'] = true;
-				$this->_user_permissions[$id][$permission->id]['by'] = $by;
-				return true;
+				$level = 'd';
+				$has_permission = $this->has_user_specific_permission($rp, $id, $level);
+				if(($level == 'g' && $by != 'u') || $level == 'u') $by = $level;
+				if(!$has_permission) return false;
 			}
-
-			// Check if permissions are assigned to group and fit the rules
-			$by = 'g';
-			$required_permissions = $this->_CI->pgroups_permissions_model->groupset_have_permissions(
-				$this->_CI->users_pgroups_model->user_group_ids($id),
-				$required_permissions,
-				$this->_group_permissions
-			);
-			if(is_bool($required_permissions)) 
-			{
-				$this->_user_permissions[$id][$permission->id]['value'] = $required_permissions;
-				$this->_user_permissions[$id][$permission->id]['by'] = $by;
-				return $required_permissions;
-			}
-
-			// Use default $permissions
-			$by = 'd';
-			foreach($required_permissions as $p) {
-				if($this->_get_permission($p)->default == false) 
-				{
-					$this->_user_permissions[$id][$permission->id]['value'] = false;
-					$this->_user_permissions[$id][$permission->id]['by'] = $by;
-					return false;
-				}
-			}
-
-			$this->_user_permissions[$id][$permission->id]['value'] = true;
-			$this->_user_permissions[$id][$permission->id]['by'] = $by;
 			return true;
 		}
-
-		$this->_user_permissions[$id][$permission->id]['value'] = false;
-		$this->_user_permissions[$id][$permission->id]['by'] = $by;
-		return false;
 	}
 
 	public function has_user_permissions($permissions, $id = false, $return_array = false, $have_only_one = false)
@@ -139,7 +91,8 @@ class Permissions {
 		if(is_bool($p)) return $p;
 
 		$by = 'd';
-		return $permission->default;
+		if($permission->default == true) return true;
+		return false;
 
 	}
 

@@ -1,4 +1,7 @@
 <?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+/* UPDATED FOR BUGFIX: SEE LINE 52 FOR FURTHER INFORMATION */
+
 class MY_Input extends CI_Input {
 	
 	/**
