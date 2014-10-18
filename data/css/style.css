@@ -64,6 +64,9 @@ pre.inline {
 tr.error, td.error {
 	border: 2px solid #C00;
 }
+.left {
+	float: left;
+}
 .right {
 	float: right;
 }
@@ -77,7 +80,8 @@ tr.error, td.error {
 	width: 100%;
 }
 .submit_form {
-	float: right;
+	text-align: right;
+	display: block;
 	padding: 10px;
 }
 #closer {
@@ -679,6 +683,12 @@ h1.in-eyecatcher {
 .spotlight .user.one-line {
 	margin-right: -55px;
 }
+.edit {
+	position: absolute;
+	padding: 6px;
+	top: 0;
+	right: 0;
+}
 /* activity log */
 .update_activity textarea {
 	-webkit-box-sizing: border-box;
@@ -690,4 +700,16 @@ h1.in-eyecatcher {
 	display: block;
 	width: 100%;
 	resize: vertical;
+}
+.edit-icon {
+	opacity: 0.5;
+	background-image: url(../images/icons/edit.png);
+	width: 26px;
+	height: 26px;
+	background-position: 0 0;
+	background-size: 26px 52px;
+	display: inline-block;
+}
+.edit-icon:hover {
+	background-position: 0 26px;
 }
