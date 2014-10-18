@@ -87,6 +87,12 @@ class Activity_log_model extends CI_Model
 		$this->db->update($this->_table, $data);
 	}
 
+	public function remove($id)
+	{
+		$this->db->where('id', $id);
+		$this->db->delete($this->_table);
+	}
+
 	/**
 	 * Returns a single post
 	 * @param int $id activity-log-post-id

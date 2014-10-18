@@ -86,6 +86,7 @@ class Activity extends CI_Controller {
 		$data['post'] = $post;
 		$data['form'] = $this->_edit_post_data($post);
 		$redirect = (isint($pagination_site)) ? 'activity/' . $pagination_site : 'activity';
+		$data['creator'] = ($post->user_id != $user->id) ? $this->auth->user($post->user_id) : $user;
 
 		if(isset($_POST['delete']))
 		{
