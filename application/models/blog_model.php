@@ -106,6 +106,17 @@ class Blog_model extends CI_Model
 	}
 
 	/**
+	 * Updates a blog entry
+	 * @param int $entryid blog-entry-id
+	 * @param array $data the updated data
+	 */
+	public function update($entryid, $data)
+	{
+		$this->db->where('id', $entryid);
+		$this->db->update($this->_table, $data);
+	}
+
+	/**
 	 * Creates a slug from a string
 	 * @param string $string The string to create the slug from
 	 * @return string The slug

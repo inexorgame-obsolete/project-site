@@ -112,6 +112,7 @@ class Blog extends CI_Controller {
 	 */
 	public function create($subblog = 'main') {
 		$this->template->add_css('data');
+		$this->template->add_css('tables');
 
 		$user = $this->auth->user();
 		
@@ -213,8 +214,126 @@ class Blog extends CI_Controller {
 	}
 
 	/**
+	 * Edit a blog entry
+	 * @param int $entryid id of the blog-entry
+	 */
+	public function edit($entryid)
+	{
+		// load user
+		$user = $this->auth->user();
+		
+		// is user logged in
+		if(!$user) { redirect('user/register'); return; }
+
+		// does the user have the permissions
+		$this->permissions->set_user($user->id);
+		if(!isint($entryid)) { redirect('blog'); return; }
+		$blogpost = $this->blog_model->get_by_id($entryid);
+		if(!($this->permissions->has_user_permission('blog_create') && $blogpost->user_id == $user->id) && !$this->permissions->has_user_permission('blog_edit_all')) { $this->template->render_permission_error(); return; }
+
+		// Start loading data for the site
+		$data = array();
+		$this->template->add_css('data');
+		$this->template->add_css('tables');
+
+		$blogpost->body = unserialize($blogpost->body);
+
+		$allow_release = false;
+		if($this->permissions->has_user_permission('blog_publish'))
+		{
+			$allow_release = true;
+		}
+
+		// Adding JS-WYSIWYG-editor and file-manager
+		$this->template->add_head('<script src="' . data('plugins/tinymce/tinymce.min.js') . '"></script>');
+		$this->template->add_head('<script src="' . data('plugins/tinymce/jquery.tinymce.min.js') . '"></script>');
+		$this->template->add_js('inline_editor', 'blog');
+
+		$this->template->print_console($this->input->post('headline'));
+		$this->template->add_js('jquery.form');
+		$this->template->add_js('ajax_upload.settings', $this);
+
+		$data['blogpost'] = $blogpost;
+
+		$overwrite = array();
+
+		if($this->input->post('submit') || $this->input->post('validate'))
+		{
+
+			$this->htmlfilter->markup = $this->input->post('headline');
+			$this->htmlfilter->filter = $this->config->item('headlinefilter');
+			$this->htmlfilter->parse();
+			$result['headline'] = $this->htmlfilter->markup;
+
+			$this->htmlfilter->replaces = $this->config->item('replaces');
+			if($this->input->post('submit'))
+			{
+				$data_config = $this->config->item('data');
+
+				if(!isset($this->htmlfilter->replaces['search']) || !isset($this->htmlfilter->replaces['replace']))
+				{
+					$this->htmlfilter->replaces['search'] = array();
+					$this->htmlfilter->replaces['replace'] = array();
+				}
+
+				$this->htmlfilter->replaces['search'][]  = $data_config['location']['external'] . $data_config['dir']['user'];
+				$this->htmlfilter->replaces['replace'][] = '{userdata}';
+
+				$this->htmlfilter->replaces['search'][]  = $data_config['location']['external'] . $data_config['dir']['data'];
+				$this->htmlfilter->replaces['replace'][] = '{data}';
+
+				$this->htmlfilter->replaces['search'][]  = $data_config['location']['external'];
+				$this->htmlfilter->replaces['replace'][] = '{base}';
+
+				if(!isset($this->htmlfilter->attr_replaces['search']) || !isset($this->htmlfilter->attr_replaces['replace']))
+				{
+					$this->htmlfilter->attr_replaces['search'] = array();
+					$this->htmlfilter->attr_replaces['replace'] = array();
+				}
+
+				$this->htmlfilter->attr_replaces['search'][]  = $data_config['location']['external'] . $data_config['dir']['user'];
+				$this->htmlfilter->attr_replaces['replace'][] = '{userdata}';
+
+				$this->htmlfilter->attr_replaces['search'][]  = $data_config['location']['external'] . $data_config['dir']['data'];
+				$this->htmlfilter->attr_replaces['replace'][] = '{data}';
+
+				$this->htmlfilter->attr_replaces['search'][]  = $data_config['location']['external'];
+				$this->htmlfilter->attr_replaces['replace'][] = '{base}';
+
+			}
+			$this->htmlfilter->markup = $this->input->post('text');
+			$this->htmlfilter->filter = $this->config->item('bodyfilter');
+			$this->htmlfilter->parse();
+			$result['text'] = $this->htmlfilter->markup;
+
+			$overwrite = array('text' => create_html_from_array($result['text']), 'headline' => create_html_from_array($result['headline']));
+		} else {
+			$data['result'] = false;
+		}
+		if($this->input->post('submit'))
+		{
+			if($allow_release && $this->input->post('enable')) $release = TRUE;
+			$slug = create_html_from_array($result['headline']);
+			if(str_replace(' ', '', strlen($this->input->post('slug'))) > 0) $slug = $this->input->post('slug');
+			$updatedata = array(
+				'headline' => create_html_from_array($result['headline']), 
+				'body'     => serialize($result['text']), 
+				'slug'     => $slug
+			);
+			if($allow_release && $this->input->post('enable')) $updatedata['public'] = true;
+			elseif($allow_release) $updatedata['public'] = false;
+			$this->blog_model->update($entryid, $updatedata);
+			redirect('blog/view/' . $entryid);
+		}
+
+		$data['form'] = $this->_get_edit_form_data($blogpost, $overwrite, $allow_release);
+		$this->load->view('blog/edit', $data);
+	}
+
+	/**
 	 * Creation-form-data
 	 * @param bool $allow_enable adds the enable-checkbox on true
+	 * @return array form-array
 	 */
 	private function _get_create_form_data($allow_enable = FALSE) 
 	{
@@ -271,6 +390,78 @@ class Blog extends CI_Controller {
 				'content'	=> 'Public ',
 				'for'		=> $data['enable']['id']
 			);
+		}
+		return $data;
+	}
+
+	/**
+	 * Edit-form-data
+	 * @param object $post blog-object
+	 * @param array $input_overwrite overwrite input data if submitted (needed for validation)
+	 * @return array form-array
+	 */
+	private function _get_edit_form_data($post, $input_overwrite = array(), $allow_enable = FALSE) 
+	{
+		$data['form'] = array('data-create' => 'form');
+		$data['headline'] = array(
+			'class' 		=> 'create-post',
+			'type'			=> 'text',
+			'value' 		=> $post->headline,
+			'name'			=> 'headline',
+			'placeholder' 	=> 'Your headline',
+			'data-create'	=> 'headline-form',
+			'class' 		=> 'js-hide'
+		);
+		$data['text'] = array(
+			'value'			=> create_html_from_array($post->body),
+			'name'			=> 'text',
+			'placeholder'	=> 'Your post content...',
+			'data-create'	=> 'text-form',
+			'class' 		=> 'js-hide'
+		);
+		$data['submit'] = array(
+			'type'			=> 'submit',
+			'value'			=> 'Update post',
+			'name'			=> 'submit',
+			'data-create'	=> 'submit',
+			'title'			=> 'Update the post'
+		);
+		$data['validate'] = array(
+			'type'			=> 'submit',
+			'value'			=> 'Validate',
+			'title'			=> 'Validate and check after the post ran through the Server-Validator. The post will be validated on submit again.',
+			'name'			=> 'validate'
+		);
+		$data['slug'] = array(
+			'type'			=> 'text',
+			'value'			=> $post->slug,
+			'name'			=> 'slug',
+			'id'			=> 'slug_name'
+		);
+		$data['slug_label'] = array(
+			'content'		=> 'Slug',
+			'for'			=> $data['slug']['id'],
+			'title'			=> 'The slug is the text displayed in the URI, for better human and machine readability.'
+		);
+		if($allow_enable == TRUE)
+		{
+			$data['enable'] = array(
+				'value'		=> 'enable',
+				'id'		=> 'enable_public',
+				'name'		=> 'enable'
+			);
+			$data['enable_label'] = array(
+				'content'	=> 'Public ',
+				'for'		=> $data['enable']['id']
+			);
+			if($post->public) { $data['enable']['checked'] = 'checked'; }
+		}
+		if(isset($_POST[$data['submit']['name']]) || isset($_POST[$data['validate']['name']]))
+		{
+			$data['headline']['value'] = (isset($input_overwrite['headline'])) ? $input_overwrite['headline'] : $this->input->post('headline');
+			$data['text']['value']     = (isset($input_overwrite['body']))     ? $input_overwrite['body']     : $this->input->post('text');
+			$data['slug']['value']     = (isset($input_overwrite['slug']))     ? $input_overwrite['slug']     : $this->input->post('slug');
+			$data['enable']['checked'] = (isset($input_overwrite['enable']))   ? $input_overwrite['enable']   : $this->input->post('enable');
 		}
 		return $data;
 	}
