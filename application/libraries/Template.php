@@ -335,6 +335,16 @@ class Template {
 	}
 
 	/**
+	 * Renders an error
+	 * @param string $headline headline to display to the viewer
+	 * @param string $text text to display to the viewer
+	 */
+	public function render_error($headline, $text)
+	{
+		$this->render_block('error', array('headline' => $headline, 'text' => $text));
+	}
+
+	/**
 	 * Renders a permission error
 	 * @param mixed $headline STRING: headline wich will be displayed | NULL: Default headline
 	 * @param mixed $text STRING: text wich will be displayed | NULL: Default text
