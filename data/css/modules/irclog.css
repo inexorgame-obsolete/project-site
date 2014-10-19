@@ -1,0 +1,44 @@
+#irc-log {
+	width: 100%;
+	border-collapse: collapse;
+}
+#irc-log td {
+	padding: 10px;
+}
+#tbl-time {
+	width: 12.5%;
+}
+#tbl-msg {
+	width: 87.5%;
+}
+#irc-log thead {
+	background-color: #333;
+	font-weight: bold;
+	color: #FFF;
+}
+#irc-log td:first-child {
+	border-right: 1px solid #333;
+	text-align: right;
+}
+#irc-log td[colspan="2"] {
+	border-right: none !important;
+	text-align: right;
+}
+#irc-log tbody tr:nth-child(even).user_renaming {
+	background-color: #E6EFEF;
+}
+#irc-log tbody tr:nth-child(odd).user_renaming {
+	background-color: #BBCCCC;
+}
+#irc-log tbody tr:nth-child(even).user_message {
+	background-color: #EFEFEF;
+}
+#irc-log tbody tr:nth-child(odd).user_message {
+	background-color: #CCC;
+}
+#irc-log tbody tr:nth-child(even).user_connection {
+	background-color: #FFFFE6;
+}
+#irc-log tbody tr:nth-child(odd).user_connection {
+	background-color: #CCCCB6;
+}
