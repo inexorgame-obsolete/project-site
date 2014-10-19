@@ -12,16 +12,17 @@
 					<li><a href="<?=site_url();?>">Project</a></li>
 					<li><a href="<?=site_url('team')?>">Team</a></li>
 					<li><a href="<?=site_url()?>#main-download-game">Download</a></li>
-					<li><a href="<?=site_url('blog')?>">Blog</a>
-						<ul>
-							<li><a href="<?=site_url('activity')?>">Activitylog</a></li>
-						</ul>
-					</li>
+					<li><a href="<?=site_url('blog')?>">Blog</a></li>
 				</ul>
 			</div>
 		</section><!--
 		--><section>
 			<div class="inner">
+				<h2>Services</h2>
+				<ul>
+					<li><a href="<?=site_url('activity');?>">Actvity-Log</a></li>
+					<li><a href="<?=site_url('irclog')?>">IRC-Log</a></li>
+				</ul>
 			</div>
 		</section><!--
 		--><section>
