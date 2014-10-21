@@ -22,11 +22,16 @@ class Irclog extends CI_Controller {
 	 * @param int $startts Current pagination
 	 * @param int $endts Logs per page
 	 */
-	public function index($startts = false, $endts = false)
+	public function index($fullwidth = false, $startts = false, $endts = false)
 	{
-		if(!isint($startts)) $startts = 1;
-		if(!isint($endts))   $endts   = 100;
+		if(isint($fullwidth)) { $endts = $startts; $startts = $fullwidth; } 
+		if(!isint($startts) || $startts < 1) $startts = 1;
+		if(!isint($endts) || $endts < 1)   $endts   = 100;
 		if($endts > 250) $endts = 250;
+		$data['full_width'] = false;
+		if($fullwidth == "full") {
+			$data['full_width'] = true;
+		}
 		$data['start'] = $startts;
 		$data['results'] = $endts;
 		$startts = ($startts - 1) * $endts;
@@ -49,7 +54,7 @@ class Irclog extends CI_Controller {
 	 */
 	public function _remap($method, $params)
 	{
-		if(isint($method))
+		if(isint($method) || $method == 'full')
 		{
 			array_unshift($params, $method);
 			return call_user_func_array(array($this, 'index'), $params);

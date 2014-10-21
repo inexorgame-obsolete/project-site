@@ -1,5 +1,12 @@
+<?php if(!$full_width): ?>
 <div class="centered">
+<?php endif; ?>
 	<h1 class="text-contrast in-eyecatcher">IRC-Log</h1>
+<?php if(!$full_width): ?>
+	<a href="<?=site_url('irclog/full/' . $start . '/' . $results);?>">View with full screen width</a>
+<?php else: ?>
+	<a href="<?=site_url('irclog/' . $start . '/' . $results);?>">View with normal width</a>
+<?php endif; ?>
 	<table id="irc-log">
 		<thead>
 			<tr>
@@ -14,7 +21,7 @@
 				<?php if($l->mtype == 'user_message'): ?>
 					<td>
 						<?php if($l->type == 'message') : ?>
-							<?=ph($l->nickname)?>: <?=ph($l->text)?>
+							<?=ph($l->nickname)?>: <?=link_links(ph($l->text))?>
 						<?php elseif($l->type == 'action') : ?>
 							&mdash; <em><?=ph($l->nickname)?> <?=ph($l->text)?></em>
 						<?php endif; ?>
@@ -49,10 +56,11 @@
 	<div class="vertical-nav">
 	<?php 
 	if($start <= $max_pagination):
+		$fstring = ($full_width) ? 'full/' : '';
 		if($start != 1):
 			$i = ($start > 5) ? $start-5 : 1;
 			while($start != $i) :
-		?><a href="<?=site_url('irclog/' . $i . '/' . $results);?>"><?=$i?></a><?php 
+		?><a href="<?=site_url('irclog/' . $fstring . $i . '/' . $results);?>"><?=$i?></a><?php 
 			$i++;
 			endwhile;
 		endif;
@@ -61,16 +69,18 @@
 			$i = ($start < ($max_pagination-5)) ? $start+5 : $max_pagination;
 			while($start != $i) :
 			$start++;
-		?><a href="<?=site_url('irclog/' . $start . '/' . $results);?>"><?=$start?></a><?php
+		?><a href="<?=site_url('irclog/' . $fstring . $start . '/' . $results);?>"><?=$start?></a><?php
 			endwhile;
 		endif;
 	else:
 		$i = ($max_pagination > 5) ? $max_pagination-5 : 1;
 		while($max_pagination >= $i):
-		?><a href="<?=site_url('irclog/' . $i . '/' . $results);?>"><?=$i;?></a><?php 
+		?><a href="<?=site_url('irclog/' . $fstring . $i . '/' . $results);?>"><?=$i;?></a><?php 
 		$i++;
 		endwhile; 
 	endif;
 	?>
 	</div>
+<?php if(!$full_width): ?>
 </div>
+<?php endif; ?>
