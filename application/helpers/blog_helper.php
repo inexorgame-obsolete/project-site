@@ -8,6 +8,7 @@ if(!function_exists('create_html_from_array')) {
 	function create_html_from_array($array)
 	{
 		$return = '';
+		if(!is_array($array)) { if(is_string($array) || is_numeric($array)) return $array; else return ''; }
 		foreach($array as $k => $v)
 		{
 			if($k == 'before') $return .= $v;
@@ -57,6 +58,8 @@ if(!function_exists('create_blog_post_from_array')) {
 			$entry_id = rand(0, 9999);
 			$ireid = false;
 		}
+		
+		if(!is_array($array)) { if(is_string($array) || is_numeric($array)) return $array; else return ''; }
 
 		if(!is_int($id)) $id = 0;
 		$singleton_tags = array(

@@ -1,6 +1,10 @@
 <?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 class Activity_log_model extends CI_Model
 {
+
+	// The table in the database
+	private $_table = 'activity_log';
+
 	// The user object
 	private $_user = false;
 
@@ -27,9 +31,9 @@ class Activity_log_model extends CI_Model
 		$this->db->order_by('id', 'DESC');
 		if($public_only)
 		{
-			$query = $this->db->get_where('activity_log', array('public' => TRUE), $start, $posts);
+			$query = $this->db->get_where($this->_table, array('public' => TRUE), $start, $posts);
 		} else {
-			$query = $this->db->get('activity_log', $start, $posts);
+			$query = $this->db->get($this->_table, $start, $posts);
 		}
 		return $query->result_array();
 	}
@@ -62,7 +66,7 @@ class Activity_log_model extends CI_Model
 	{
 		if($public) $public = TRUE;
 		else $public = FALSE;
-		$this->db->insert('activity_log', 
+		$this->db->insert($this->_table, 
 			array(
 				'changes'   => $text, 
 				'public'    => $public, 
@@ -70,6 +74,33 @@ class Activity_log_model extends CI_Model
 				'timestamp' => date('Y-m-d H:i:s')
 			)
 		);
+	}
+
+	/**
+	 * Updates an entry
+	 * @param int $id activity-log-post-id
+	 * @param array $data The new data
+	 */
+	public function update($id, $data)
+	{
+		$this->db->where('id', $id);
+		$this->db->update($this->_table, $data);
+	}
+
+	public function remove($id)
+	{
+		$this->db->where('id', $id);
+		$this->db->delete($this->_table);
+	}
+
+	/**
+	 * Returns a single post
+	 * @param int $id activity-log-post-id
+	 * @return object activity-log-object
+	 */
+	public function get_post($id) 
+	{
+		return $this->db->get_where($this->_table, array('id' => $id))->row();
 	}
 
 	/**
@@ -83,9 +114,9 @@ class Activity_log_model extends CI_Model
 		if($posts < 0 || $posts === false || $posts != (string) (int) $posts) $posts = 30;
 		if($public_only)
 		{
-			$query = $this->db->get_where('activity_log', array('public' => TRUE));
+			$query = $this->db->get_where($this->_table, array('public' => TRUE));
 		} else {
-			$query = $this->db->get('activity_log');
+			$query = $this->db->get($this->_table);
 		}
 		return ceil($query->num_rows() / $posts);
 	}

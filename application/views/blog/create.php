@@ -1,7 +1,7 @@
 <div class="centered">
 	<h1 class="text-contrast in-eyecatcher">Create Blog Post</h1>
 </div>
-	<?=form_open('blog/create/', $form['form']);?>
+	<?=form_open(NULL, $form['form']);?>
 		<div class="centered">
 			<div class="nojs-create">
 				<?=form_input($form['headline']);?>
