@@ -15,6 +15,7 @@ class Irclog extends CI_Controller {
 		$this->load->model('irc_model');
 		$this->load->library('template');
 		$this->template->add_css($this);
+		$this->template->add_js('users-list', $this);
 	}
 
 	/**
@@ -36,6 +37,7 @@ class Irclog extends CI_Controller {
 		$data['results'] = $endts;
 		$startts = ($startts - 1) * $endts;
 		$data['log'] = $this->irc_model->get($startts, $endts);
+
 		if(count($data['log']) == 0)
 		{
 			redirect('irclog');
