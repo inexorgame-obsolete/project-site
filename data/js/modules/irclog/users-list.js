@@ -3,8 +3,8 @@ $(document).ready(function () {
 		if ($(window).scrollTop() > topDistance) {
 			if(($(window).scrollTop() - topDistance - 10) < $('#log').height() - $('#user-list').height()) {
 				$('#user-list').css({
-					'margin-top': $(window).scrollTop() - topDistance - 10,
-					'max-height': window.innerHeight
+					'margin-top': $(window).scrollTop() - topDistance + $('header').height(),
+					'max-height': window.innerHeight - $('header').height()
 				});
 			} else {
 				$('#user-list').css({

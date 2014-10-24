@@ -4,9 +4,9 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
  	<title>{title}</title>
-
 	<?php
 		dcss('style');
+		dcss('nav');
 		dcss('OpenSans');
 		dcss('medium-device', '(max-width: 960px)');
 		dcss('small-device', '(max-width: 800px)');;
@@ -20,6 +20,9 @@
 		var user_dir = <?php if(isset($user['id'])) echo "'data/user_upload/".$user['id']."/'"; else echo 'false'; ?>;
 	</script>
 	<script src="<?=js('search')?>"></script>
+	<script src="<?=js('nav')?>"></script>
+	<link rel="prerender" href="<?=data('images/logo_extrasmall.png')?>" />
+	<link rel="prefetch" href="<?=data('images/logo_extrasmall.png')?>" />
 	{head}
 </head>
 <body>
@@ -135,6 +138,8 @@
 				<div class="result" data-searchid="<?=$main_search_id;?>"></div>
 			</div>
 		</div>
+	</div>
+	<div id="header_placeholder">
 	</div>
 	<div id="main-eyecatcher" class="eyecatcher image-mover" style="background-image:url({eyecatcher_image:<?=iimage('eyecatcher');?>});">
 	</div>
