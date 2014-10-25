@@ -90,7 +90,7 @@ function add_irc_colors($string)
 				return $r;
 			} elseif(isset($irccolors[$m[1]])) {
 				if($j != 0) $r .= '</span>';
-				$r .= '<span style="text-shadow: 0 0 3px #000; ' . $irccolors[$m[1]];
+				$r .= '<span style="' . $irccolors[$m[1]];
 				if(isset($m[2]) && isset($bgirccolors[$m[2]]))
 				{
 					$r .= $bgirccolors[$m[2]];
@@ -108,6 +108,7 @@ function add_irc_colors($string)
 function _irc_link_links($string) {
 	return preg_replace("/(http|https|ftp|ftps)\:\/\/[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,9}([^\s\\\]*)?/", '<a target="_blank" href="$0">$0</a>', $string);
 }
+$users_fallback = $start_users;
 if(!$full_width): ?>
 <div class="centered">
 <?php endif; ?>
@@ -117,52 +118,62 @@ if(!$full_width): ?>
 <?php else: ?>
 	<a href="<?=site_url('irclog/' . $start . '/' . $results);?>">View with normal width</a>
 <?php endif; ?>
-	<table id="irc-log">
-		<thead>
-			<tr>
-				<td id="tbl-time">Time</td>
-				<td id="tbl-msg">Message</td>
-			</tr>
-		</thead>
-		<tbody>
-			<?php foreach($log as $l) : ?>
-				<tr class="<?=$l->mtype?>">
-					<td title="<?=strip_tags(dt($l->timestamp))?>"><?=tm($l->timestamp);?></td>
-				<?php if($l->mtype == 'user_message'): ?>
-					<td>
-						<?php if($l->type == 'message') : ?>
-							<?=ph($l->nickname)?>: <?=add_irc_colors(_irc_link_links(ph($l->text)))?>
-						<?php elseif($l->type == 'action') : ?>
-							&mdash; <em><?=ph($l->nickname)?> <?=add_irc_colors(_irc_link_links(ph($l->text)))?></em>
-						<?php endif; ?>
-					</td>
-				<?php elseif($l->mtype == 'user_connection'): ?>
-					<td>
-					<?php if($l->type == 'join') : ?>
-						<em><?=ph($l->nickname)?></em> joined <?=$channel;?>.
-					<?php elseif($l->type == 'part' || $l->type == 'quit') : ?>
-						<em><?=ph($l->nickname)?></em> left <?=$channel?>.
-					<?php elseif($l->type == 'bot-connect') : ?>
-						The bot joined the channel.
-					<?php endif; ?>
-					</td>
-				<?php elseif($l->mtype == 'user_renaming') : ?>
-					<td>
-					<em><?=ph($l->nickname);?></em> is now known as <em><?=ph($l->newnick);?>.</em>
-					</td>
-				<?php endif; ?>
+	<div id="log">
+		<div id="user-list">
+			<span class="headline">Users <span class="users-count right">(<?=count((array) $start_users)?>)</span></span>
+			<ul>
+				<li class="title"><?=dt_tm($log[count($log)-1]->timestamp)?></li>
+				<?php 
+				$start_users = (array) $start_users;
+				krsort($start_users);
+				arsort($start_users);
+				foreach($start_users as $u => $s): ?>
+					<li class="default"><?=$s.$u?></li>
+				<?php endforeach; ?>
+			</ul>
+		</div>
+		<table id="irc-log">
+			<thead>
+				<tr>
+					<td id="tbl-time">Time</td>
+					<td id="tbl-msg">Message</td>
 				</tr>
-			<?php endforeach; ?>
-			<tr>
-				<td colspan="2">
-				In the channel were at this moment: 
-				<?php $i = 0; foreach($start_users as $n => $r): 
-					if($i > 0) : ?>,<?php endif; ?>
-					<?=$r?><?=ph($n)?><?php $i++; endforeach; ?>
-				</td>
-			</tr>
-		</tbody>
-	</table>
+			</thead>
+			<tbody>
+				<?php foreach($log as $l) : ?>
+					<tr class="<?=$l->mtype?>">
+						<td title="<?=strip_tags(dt($l->timestamp))?>"><?=tm($l->timestamp);?></td>
+					<?php if($l->mtype == 'user_message'): ?>
+						<td>
+							<?php if($l->type == 'message') : ?>
+								<?=ph($l->nickname)?>: <?=add_irc_colors(_irc_link_links(ph($l->text)))?>
+							<?php elseif($l->type == 'action') : ?>
+								&mdash; <em><?=ph($l->nickname)?> <?=add_irc_colors(_irc_link_links(ph($l->text)))?></em>
+							<?php endif; ?>
+						</td>
+					<?php elseif($l->mtype == 'user_connection'): ?>
+						<td class="user-action user-connection" data-user-list='<?=p_r($l->text)?>'>
+						<?php if($l->type == 'join') : ?>
+							<em><?=ph($l->nickname)?></em> joined <?=$channel;?>.
+						<?php elseif($l->type == 'part' || $l->type == 'quit') : ?>
+							<em><?=ph($l->nickname)?></em> left <?=$channel?>.
+						<?php elseif($l->type == 'bot-connect') : ?>
+							The bot joined the channel.
+						<?php endif; ?>
+						</td>
+					<?php elseif($l->mtype == 'user_renaming') : ?>
+						<td class="user-action user-renaming" data-user-rename='<?=p_r(json_encode(array($l->nickname, $l->newnick), JSON_HEX_QUOT))?>'>
+						<em><?=ph($l->nickname);?></em> is now known as <em><?=ph($l->newnick);?>.</em>
+						</td>
+					<?php endif; ?>
+					</tr>
+				<?php endforeach; ?>
+				<tr style="display: none;" class="user_connection">
+					<td class="user-action user-connection" data-user-list='<?=p_r(json_encode($users_fallback))?>'></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
 	<div class="vertical-nav">
 	<?php 
 	if($start <= $max_pagination):
