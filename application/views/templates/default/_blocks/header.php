@@ -8,8 +8,9 @@
 		dcss('style');
 		dcss('nav');
 		dcss('OpenSans');
+		dcss('big-device', '(min-width: 1100px)');
 		dcss('medium-device', '(max-width: 960px)');
-		dcss('small-device', '(max-width: 800px)');;
+		dcss('small-device', '(max-width: 800px)');
 		dcss('mini-device', '(max-width: 600px)');
 	?>
 	<script src="<?=js('jquery')?>"></script>
@@ -87,28 +88,35 @@
 		</div>
 	</div>
 <?php endif; ?>
-	<header>
+	<header id="top-main-menu">
 		<div class="border menu">
-			<div class="helper">
-				<a href="<?=site_url()?>"><img src="<?=image('logo_small.png'); ?>" alt="{sitetitle}" /></a>
-				<span class="title"><a href="<?=site_url()?>">{sitetitle}</a></span>
+			<div class="navigation">
+				<div class="helper">
+					<a href="<?=site_url()?>"><img src="<?=image('logo_small.png'); ?>" alt="{sitetitle}" /></a>
+					<span class="title"><a href="<?=site_url()?>">{sitetitle}</a></span>
+				</div>
+				<ul id="main-menu">
+					<li><a href="<?=site_url();?>">Project</a></li>
+					<li><a href="<?=site_url('team')?>">Team</a></li>
+					<li><a href="<?=site_url()?>#main-download-game">Download</a></li>
+					<li><a href="<?=site_url('blog')?>">Blog</a></li>
+				</ul>
 			</div>
-			<ul id="main-menu">
-				<li><a href="<?=site_url();?>">Project</a></li>
-				<li><a href="<?=site_url('team')?>">Team</a></li>
-				<li><a href="<?=site_url()?>#main-download-game">Download</a></li>
-				<li><a href="<?=site_url('blog')?>">Blog</a></li>
-			</ul>
 			<?php if ($logged_in === false): ?>
-				<div class="user-showcase">
-					<?=form_open('user/login');?>
-						<input type="text" name="username_email" placeholder="E-Mail or Username" />
-						<input type="password" name="password" placeholder="Password" /><br />
-						<div class="right">
-							<label for="stay_logged_in_quick_login">Stay logged in </label><input type="checkbox" checked="checked" name="stay_logged_in" id="stay_logged_in_quick_login" />
-							<input type="submit" name="submit" value="Login" />
-						</div>
-					<?=form_close();?>
+				<div class="user-login">
+					<div class="login-field">
+						<?=form_open('user/login');?>
+							<div class="user-login-field"><input type="text" name="username_email" placeholder="E-Mail or Username" /></div>
+							<div class="user-login-field"><input type="password" name="password" placeholder="Password" /></div>
+							<div class="right user-login-submit">
+								<label for="stay_logged_in_quick_login">Stay logged in </label><input type="checkbox" checked="checked" name="stay_logged_in" id="stay_logged_in_quick_login" />
+								<input type="submit" name="submit" value="Login" />
+							</div>
+						<?=form_close();?>
+					</div>
+					<div class="login-link">
+						<a href="<?=site_url('user/login');?>">Login</a>
+					</div>
 				</div>
 			<?php else: ?>
 			<div class="user-showcase">
@@ -117,6 +125,8 @@
 			<?php endif; ?>
 			<div class="clear"></div>
 		</div>
+		<a class="opener" href="#top-main-menu">&#9776; Menu</a>
+		<a class="closer" href="#closer">&#9776; Close</a>
 	</header>
 	<div id="search-window">
 		<a href="#" class="close-background"></a>

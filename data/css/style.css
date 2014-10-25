@@ -248,6 +248,8 @@ tr.error, td.error {
 .vertical-nav li:first-child a {
 	margin-left: 0;
 }
+
+
 /* Section-specific declaration */
 #loader {
 	height: 4px;
