@@ -36,7 +36,7 @@ class Permissions {
 	public function has_user_permission($permission, $id = false, &$by = false) {
 		$by = 'd';
 		if(!isint($id)) $id = $this->_userid;
-		if($id != false) {
+		if(isint($id)) {
 			$permission = $this->_get_permission($permission);
 			$required_permissions = $this->get_all_parents($permission->id);
 			$required_permissions[] = (int) $permission->id;
@@ -50,6 +50,7 @@ class Permissions {
 			}
 			return true;
 		}
+		return false;
 	}
 
 	public function has_user_permissions($permissions, $id = false, $return_array = false, $have_only_one = false)

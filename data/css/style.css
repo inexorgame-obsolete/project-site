@@ -25,6 +25,8 @@ img {
 	border: none;
 }
 input, textarea {
+	position: relative;
+	z-index: 1;
 	padding: 5px;
 	border: 1px solid #CCC;
 	font-size: 15px;
@@ -39,6 +41,12 @@ input[type=password] {
 input[type=submit] {
 	padding: 10px;
 	border-radius: 2px;
+}
+input[type=submit].one-line {
+	height: 32px;
+	padding: 0 10px 0 20px;
+	margin-left: -10px;
+	z-index: 0;
 }
 input[type=file] {
 	border: none;
