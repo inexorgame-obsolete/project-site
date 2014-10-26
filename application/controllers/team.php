@@ -65,7 +65,6 @@ class Team extends CI_Controller {
 				$data["devusers"][$u] = $this->auth->user($u);
 			}
 		}
-
 		$this->load->view('team/index', $data);
 	}
 

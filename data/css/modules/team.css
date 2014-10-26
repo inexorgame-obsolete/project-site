@@ -51,8 +51,11 @@
 	vertical-align: top;
 	width: 50%;
 	display: inline-block;
+	margin-right: -1px;
 }
 .working-on {
 	border-right: 1px solid #CCC;
-	margin-right: -1px;
+}
+.work-finished {
+	border-left: 1px solid #CCC;
 }

@@ -28,7 +28,6 @@ class Development_model extends CI_Model {
 		{
 			if(!isset($return[$d->type][$d->user_id]))
 			{
-				$return[$d->type] = array();
 				$return[$d->type][$d->user_id] = array(
 					'done'   => array(),
 					'undone' => array()
