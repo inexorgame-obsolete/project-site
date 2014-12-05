@@ -1,11 +1,11 @@
 <?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 $config['template'] = 'default';
-$config['title']['prefix'] = '';					// String will be added before every title
-$config['title']['suffix'] = ' • Sauerfork';		// String will be added after every title
-$config['title']['default'] = 'Sauerfork';					// Default title if no title is set; The only title not containing the prefix and suffix
+$config['title']['prefix'] = '';		      			// String will be added before every title
+$config['title']['suffix'] = ' • inexor';	    	// String will be added after every title
+$config['title']['default'] = 'inexor';					// Default title if no title is set; The only title not containing the prefix and suffix
 $config['variables'] = array();
-$config['variables']['sitetitle'] = 'Sauerfork';
+$config['variables']['sitetitle'] = 'inexor';
 $config['variables']['base'] = FALSE; 				// Will be overwritten and replaced by base_url();
 $config['variables']['data'] = FALSE;				// Will be overwritten and replaced by base_url() . $data;
 $config['variables']['userdata'] = FALSE;			// Will be overwritten and replaced by base_url() . $userdata;
