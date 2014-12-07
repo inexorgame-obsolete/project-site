@@ -91,10 +91,11 @@
 			<h2>Download</h2>
 			<p>Currently the project is in an early state. Because of this just the sourcecode of {sitetitle} is available.</p>
 			<ul class="downloads">
-				<li><a class="icon-windows" href="https://github.com/sauerbraten-fork/sauerbraten-fork/tree/master" target="_blank">{sitetitle} for Windows</a></li>
-				<li><a class="icon-mac" href="https://github.com/sauerbraten-fork/sauerbraten-fork/tree/master" target="_blank">{sitetitle} for Mac</a></li>
-				<li><a class="icon-linux" href="https://github.com/sauerbraten-fork/sauerbraten-fork/tree/master" target="_blank">{sitetitle} for Linux</a></li>
-				<li><a class="icon-github" href="https://github.com/sauerbraten-fork/sauerbraten-fork/tree/master" target="_blank">{sitetitle} sourcecode</a></li>
+                                <li><a class="icon-windows" href="https://github.com/inexor-game/code/tree/master" target="_blank">{sitetitle} for Windows</a></li>
+                                <li><a class="icon-mac" href="https://github.com/inexor-game/code/tree/master" target="_blank">{sitetitle} for Mac</a></li>
+                                <li><a class="icon-linux" href="https://github.com/inexor-game/code/tree/master" target="_blank">{sitetitle} for Linux</a></li>
+                                <li><a class="icon-github" href="https://github.com/inexor-game/code/tree/master" target="_blank">{sitetitle} sourcecode</a></li>
+                                <li><a href="http://nightly.inexor.org" target="_blank">{sitetitle} nightly builds</li>
 			</ul>
 		</div>
 	</div>
