@@ -28,7 +28,7 @@ class User extends CI_Controller {
 	 */
 	function index()
 	{
-		$this->form_validation->set_rules('search', 'search field', 'xss_clean|required');
+		$this->form_validation->set_rules('search', 'search field', 'required');
 		if ($this->form_validation->run() == true) {
 			$search = $this->input->post('search');
 			redirect('/user/search/' . urlencode($search));
@@ -122,7 +122,7 @@ class User extends CI_Controller {
 	{
 		$string = urldecode($string);
 		
-		$this->form_validation->set_rules('search', 'search field', 'xss_clean|required');
+		$this->form_validation->set_rules('search', 'search field', 'required');
 		if ($this->form_validation->run() == true) {
 			redirect('/user/search/' . urlencode($this->input->post('search')));
 		} else {

@@ -1,6 +1,5 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 class Blog extends CI_Controller {
-
 	/**
 	 * Magic Method __construct()
 	 */
@@ -14,6 +13,7 @@ class Blog extends CI_Controller {
 		$this->load->config('data', TRUE);
 		$this->load->helper('blog_helper');
 		$this->load->library('htmlfilter');
+		$this->load->library('comments');
 		$this->load->library('permissions');
 		$this->load->library('auth');
 

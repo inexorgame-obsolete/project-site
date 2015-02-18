@@ -17,7 +17,6 @@ $(document).ready(function()
             },
             complete: function(response) 
             {
-                console.log(response);
                 var res = $.parseJSON(response.responseText);
                 if(res.success == true) {
                     var d = new Date();

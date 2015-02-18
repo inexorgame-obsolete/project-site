@@ -218,7 +218,7 @@ class Auth
 	 * @return bool
 	 */
 	public function is_logged_in() {
-		if(isint($this->user_session())) return true;
+		if(intis($this->user_session())) return true;
 		$uid = $this->_CI->input->cookie('user_id');
 		$ucd = $this->_CI->input->cookie('user_code');
 		if($this->_CI->users_stay_logged_in_model->check($uid, $ucd, true)) {
@@ -380,7 +380,7 @@ class Auth
 		// Check for E-Mail
 		if(in_array('email', $validate_array)) {
 			$error['fields']['email'] = false;
-			if(!valid_email($d['email'])) 
+			if(!((bool) filter_var($d['email'], FILTER_VALIDATE_EMAIL))) 
 			{
 				$error['messages']['invalid_email'] = $error_messages['invalid_email'];
 				$error['fields']['email'] = true;

@@ -10,7 +10,7 @@ class Cronjobs extends CI_Controller {
 	public function __construct() {
 		parent::__construct();
 		// Only allow Command-Line-Interface-requests, no external requests
-		if(!$this->input->is_cli_request()) 
+		if(!is_cli()) 
 		{
 			show_404();
 			die(); // for safety reasons if show_404() won't work as expected or properly.

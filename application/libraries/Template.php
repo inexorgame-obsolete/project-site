@@ -255,7 +255,7 @@ class Template {
 	{
 		$template = $this->config->item('template');
 		$view = 'templates/' . $this->config->item('template') . '/_blocks/' . $block;
-		$file = FCPATH . APPPATH . 'views/' . $view . '.php';
+		$file = APPPATH . 'views/' . $view . '.php';
 		if(is_array($data))
 		{
 			$this->_data = array_merge($this->_data, $data);
