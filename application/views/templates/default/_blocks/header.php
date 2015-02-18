@@ -14,7 +14,6 @@
 		dcss('mini-device', '(max-width: 600px)');
 	?>
 	<script src="<?=js('jquery')?>"></script>
-	<script src="<?=js('bg-pointer')?>"></script>
 	<script>
 		var default_search_api = '<?=$default_search_api;?>';
 		var base_url = <?="'".$base."'";?>;
