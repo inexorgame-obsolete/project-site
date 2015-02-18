@@ -1,6 +1,6 @@
 <div class="centered">
 	<div id="change_background_picture"><!--
-		--><?=form_open_multipart('user/edit/picture/background', array('class' => 'ajax-upload'));?><!--
+		--><?=form_open_multipart('user/edit/picture/background', array('class' => 'ajax-upload', 'data-uploadconfig' => 'backgroundImage'));?><!--
 			--><?=form_input($change_picture['background']['upload']);?><!--
 			--><?=form_input($change_picture['background']['submit']);?><!--
 			--><?=form_input($change_picture['background']['delete']);?><!--
@@ -12,7 +12,7 @@
 		</div>
 		<div id="change_profile_picture">
 			<div class="clear"></div>
-			<?=form_open_multipart('user/edit/picture/profile', array('class' => 'ajax-upload'));?>
+			<?=form_open_multipart('user/edit/picture/profile', array('class' => 'ajax-upload', 'data-uploadconfig' => 'profileImage'));?>
 				<?=form_input($change_picture['profile']['upload']);?>
 				<?=form_input($change_picture['profile']['submit']);?>
 				<?=form_input($change_picture['profile']['delete']);?>
