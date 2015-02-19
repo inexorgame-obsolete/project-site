@@ -25,9 +25,17 @@ img {
 	border: none;
 }
 input, textarea {
+	position: relative;
+	z-index: 1;
 	padding: 5px;
 	border: 1px solid #CCC;
 	font-size: 15px;
+}
+input[type=submit].one-line {
+	height: 32px;
+	padding: 0 10px 0 20px;
+	margin-left: -10px;
+	z-index: 0;
 }
 input[type=text], textarea, input[type=password] {
 	font-size: 17px;
