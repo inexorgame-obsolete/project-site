@@ -37,7 +37,7 @@
 .download-game {
 	background-image: url(../../images/download/xenon-without-rock.png);
 	background-position: center 0;
-	background-size: 100% auto;
+	background-size: cover;
 	box-shadow: 0 0 10px #000;
 	width: 100%;
 	height: 680px;
