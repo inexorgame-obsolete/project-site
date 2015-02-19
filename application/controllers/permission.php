@@ -12,8 +12,8 @@ class Permission extends CI_Controller {
 	 */
 	public function __construct() {
 		parent::__construct();
-		$this->load->model('permissions_model');
-		$this->load->model('pgroups_model');
+		$this->load->model('shared/permissions_model');
+		$this->load->model('shared/pgroups_model');
 		$this->load->library('auth');
 		$this->load->library('permissions');
 		$this->load->library('template');
@@ -66,7 +66,7 @@ class Permission extends CI_Controller {
 			$this->template->render_permission_error(NULL, 'You have not the permission to edit this user. You need the permission \'edit_permission_editors_permissions\' therefore.');
 			return;
 		}
-		$this->load->model('users_pgroups_model');
+		$this->load->model('shared/users_pgroups_model');
 		if(strtolower($order) != 'asc') $order = 'DESC';
 		if($id === false || !isint($id)) { show_404(); return; }
 		isint($start, 1);
@@ -115,7 +115,7 @@ class Permission extends CI_Controller {
 			show_404();
 			return;
 		}
-		$this->load->model('users_permissions_model');
+		$this->load->model('shared/users_permissions_model');
 		isint($start, 1);
 		isint($results, 30);
 		$data['start'] = $start;
@@ -226,7 +226,7 @@ class Permission extends CI_Controller {
 		if($start < 1) $start = 1;
 		if($results === false) $results = 30;
 		if(!isint($results)) $results = 30;
-		$this->load->model('pgroups_permissions_model');
+		$this->load->model('shared/pgroups_permissions_model');
 		$data = array();
 		$data['edit_permission_groups'] = $this->permissions->has_user_permission('edit_permission_groups');
 		$data['start'] = $start;
@@ -254,7 +254,7 @@ class Permission extends CI_Controller {
 	 * @param object $permission the permissions-object of the parent
 	 */
 	private function _group_permission($groupid, $permission) {
-		$this->load->model('pgroups_permissions_model');
+		$this->load->model('shared/pgroups_permissions_model');
 		$data = array();
 		$data['form'] = false;
 		$data['edit_permission_groups'] = $this->permissions->has_user_permission('edit_permission_groups');
@@ -273,7 +273,7 @@ class Permission extends CI_Controller {
 	 * @param object $permission ther permissions-parent of the parent
 	 */
 	private function _user_permission($userid, $permission) {
-		$this->load->model('users_permissions_model');
+		$this->load->model('shared/users_permissions_model');
 		$data = array();
 		$data['form'] = false;
 		$data['edit_permissions'] = $this->permissions->has_user_permission('edit_permissions');

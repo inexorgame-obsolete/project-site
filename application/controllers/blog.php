@@ -1,5 +1,7 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 class Blog extends CI_Controller {
+	private $_comments;
+
 	/**
 	 * Magic Method __construct()
 	 */
@@ -13,9 +15,10 @@ class Blog extends CI_Controller {
 		$this->load->config('data', TRUE);
 		$this->load->helper('blog_helper');
 		$this->load->library('htmlfilter');
-		$this->load->library('comments');
 		$this->load->library('permissions');
 		$this->load->library('auth');
+
+		$this->_comments = $this->load->library('comments', array('project-blog'));
 
 		$this->load->library('template');
 		$this->template->add_css($this);
@@ -66,6 +69,7 @@ class Blog extends CI_Controller {
 	 */
 	public function view($slug = false)
 	{
+		// Checking if post exists and user is allowed to view it.
 		if(!$slug)
 		{
 			$this->index();
@@ -94,6 +98,10 @@ class Blog extends CI_Controller {
 		$entry->body = unserialize($entry->body);
 		if((isset($user) && $permissions && ($user->id == $entry->user_id || $this->permissions->has_user_permission('blog_publish_all'))) || $entry->public == true) $access = true;
 		else { $this->template->render_permission_error(); return; }
+
+		// Site exists, user is permitted to view.
+		$this->comments->set_identifier($entry->id);
+
 		$data['entry'] = $entry;
 		$data['creator'] = $this->auth->user($entry->user_id);
 
