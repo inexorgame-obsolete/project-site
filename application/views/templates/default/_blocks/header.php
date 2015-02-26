@@ -6,6 +6,7 @@
  	<title>{title}</title>
 	<?php
 		dcss('style');
+		dcss('comments');
 		dcss('nav');
 		dcss('OpenSans');
 		dcss('big-device', '(min-width: 1100px)');

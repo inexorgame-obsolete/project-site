@@ -100,7 +100,26 @@ class Blog extends CI_Controller {
 		else { $this->template->render_permission_error(); return; }
 
 		// Site exists, user is permitted to view.
+		
 		$this->comments->set_identifier($entry->id);
+
+		$comment_settings = array();
+		if(isset($_GET['answers']))
+			$comment_settings["answers-to"] = $_GET['answer'];
+
+		$this->template->variable_block(
+			"comments/" . $entry->id, 
+			'comments', 
+			array(
+				'commented'  => $this->comments->submit_comment(),
+				'comments'   => $this->comments->get_comments($comment_settings),
+				'module'     => $this->comments->get_module(),
+				'identifier' => $this->comments->get_identifier(),
+				'user'       => $user
+			), 
+			TRUE);
+		// echo "<pre>";
+		// var_dump($this->comments->get_comments());
 
 		$data['entry'] = $entry;
 		$data['creator'] = $this->auth->user($entry->user_id);

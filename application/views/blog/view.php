@@ -14,4 +14,9 @@
 			<?=d($creator->about);?>
 		</div>
 	</div>
+
+	<h2 id="comments-section">Comments</h2>
+
+	{comments/<?=$entry->id?>}
+	
 </div>

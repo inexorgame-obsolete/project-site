@@ -7,7 +7,7 @@
 	<h1><a href="<?=site_url('blog/view/' . $entry['id'])?>"><?=d($entry['headline'])?></a></h1>
 	<?=create_blog_post_from_array($entry['body'], $entry['id'], true);?>
 	<ul class="vertical-nav">
-		<li><a href="<?=site_url('blog/view/' . $entry['id'])?>">View post</a></li><li><a href="<?=site_url('blog/view/' . $entry['id']) . '#comments'?>">Comments</a></li><?php 
+		<li><a href="<?=site_url('blog/view/' . $entry['id'])?>">View post</a></li><li><a href="<?=site_url('blog/view/' . $entry['id']) . '#comments-section'?>">Comments</a></li><?php 
 	if($user_edit_others || $user_may_release) : 
 	?><li><a href="<?=site_url('blog/edit/' . $entry['id'])?>">Edit post</a></li><?php
 	endif; ?>
