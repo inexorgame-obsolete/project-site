@@ -19,9 +19,13 @@
 		var default_search_api = '<?=$default_search_api;?>';
 		var base_url = <?="'".$base."'";?>;
 		var user_dir = <?php if(isset($user['id'])) echo "'data/user_upload/".$user['id']."/'"; else echo 'false'; ?>;
+		var time_string = "YYYY-MM-DD HH:mm:ss";
 	</script>
+	<script src="<?=js('main')?>"></script>
+	<script src="<?=js('moment')?>"></script>
 	<script src="<?=js('search')?>"></script>
 	<script src="<?=js('nav')?>"></script>
+	<script src="<?=js('comments')?>"></script>
 	<link rel="prerender" href="<?=data('images/logo_extrasmall.png')?>" />
 	<link rel="prefetch" href="<?=data('images/logo_extrasmall.png')?>" />
 	{head}

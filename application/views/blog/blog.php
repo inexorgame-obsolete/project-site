@@ -14,7 +14,7 @@
 	</ul>
 	<div class="spotlight">
 		<a href="<?=site_url('user/'.$entry['user_id'])?>"><div class="avatar" style="background-image:url(<?=avatar_image($entry['user_id'])?>);"></div><?=showname($creator);?>
-		<br /><span class="date" title="<?=tm($entry['timestamp'])?>"><?=dt($entry['timestamp'])?></span></a>
+		<br /><span class="date"><?=dt($entry['timestamp'])?></span></a>
 		<div class="about">
 			<?=d($creator->about);?>
 		</div>
