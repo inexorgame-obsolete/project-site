@@ -1,3 +1,11 @@
+@keyframes highlight-error {
+	from{box-shadow: inset 0 0 5px #F66;}
+	to  {box-shadow: inset 0 0 0px #F66;}
+}
+@-webkit-keyframes highlight-error {
+	from{box-shadow: inset 0 0 5px #F66;}
+	to  {box-shadow: inset 0 0 0px #F66;}
+}
 body, html {
 	margin: 0;
 	padding: 0;
@@ -58,6 +66,9 @@ hr {
 	height: 1px;
 	background-color: #CCC;
 	clear: both;
+}
+textarea.error {
+	-webkit-animation: highlight-error 1.5s;
 }
 pre.inline {
 	display: inline-block;

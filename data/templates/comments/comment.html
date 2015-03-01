@@ -1,0 +1,12 @@
+<div class="comment <%=answer: %>" id="comment-<%=id%>">
+	<div class="comment-text">
+		<a href="<%=BASE_URL%>user/<%=userid%>"><span class="user"><%=username%></span></a>
+			<%=comment%>
+	</div>
+	<div class="comment-actions">
+		<span data-moment="<%=date%>"><%=datestring%></span> &sdot;
+		<a data-comment-answer="<%=id%>">Answer</a>
+		<%=seeanswers: %>
+	</div>
+	<a class="user-image" href="<%=BASE_URL%>user/<%=userid%>"><img src="<%=userimage%>" alt="avatar" class="avatar"></a>
+</div>

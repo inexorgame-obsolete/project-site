@@ -1,0 +1,8 @@
+<form action="<%=location%>" id="comments-answer-<%=answerid%>" class="create-answer" method="POST" accept-charset="utf-8">
+	<input type="hidden" name="duplicate-preventer" value="<%=randomstring%>">
+	<input type="hidden" name="comment-answer-to" value="<%=answerid%>">
+	<div class="comments-wrapper">
+		<textarea name="comment" placeholder="<%=placeholder:Your comment...%>" autofocus <%=disabled: %>></textarea>
+	</div>
+	<input type="submit" name="comments-submit" value="Submit comment" <%=disabled: %>>
+</form>

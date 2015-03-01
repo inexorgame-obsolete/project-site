@@ -104,22 +104,37 @@ class Blog extends CI_Controller {
 		$this->comments->set_identifier($entry->id);
 
 		$comment_settings = array();
+		if(isset($_GET['answer']))
+			$comment_settings["include-comment"] = $_GET['answer'];
+
 		if(isset($_GET['answers']))
-			$comment_settings["answers-to"] = $_GET['answer'];
+		{
+			$comment_settings['answers-to'] = $_GET['answers'];
+			if(isset($_GET['end']))
+			{
+				$comment_settings['answers-to-limit'] = 30;
+				$comment_settings['answers-to-offset'] = (isint($_GET['end']) && $_GET['end'] <= 30) ? 0 : $_GET['end'] - 30;
+			}
+		} 
+		elseif(isset($_GET['end']))
+		{
+			$comment_settings['offset'] = array((isint($_GET['end']) && $_GET['end'] <= 30) ? 0 : $_GET['end'] - 30);
+		}
 
 		$this->template->variable_block(
 			"comments/" . $entry->id, 
 			'comments', 
 			array(
-				'commented'  => $this->comments->submit_comment(),
-				'comments'   => $this->comments->get_comments($comment_settings),
-				'module'     => $this->comments->get_module(),
-				'identifier' => $this->comments->get_identifier(),
-				'user'       => $user
+				'commented'       => $this->comments->submit_comment(),
+				'offset'          => isset($comment_settings['offset']) ? $comment_settings['offset'] : array(0),
+				'comments'        => $this->comments->get_comments($comment_settings),
+				'module'          => $this->comments->get_module(),
+				'identifier'      => $this->comments->get_identifier(),
+				'user'            => $user,
+				'count_comments'  => $this->comments->count(),
+				'answers_offset'  => isset($comment_settings['answers-to-offset']) ? $comment_settings['answers-to-offset'] : 0
 			), 
 			TRUE);
-		// echo "<pre>";
-		// var_dump($this->comments->get_comments());
 
 		$data['entry'] = $entry;
 		$data['creator'] = $this->auth->user($entry->user_id);
