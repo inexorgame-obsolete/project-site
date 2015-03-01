@@ -17,6 +17,6 @@
 
 	<h2 id="comments-section">Comments</h2>
 
-	{comments/<?=$entry->id?>}
+	<%=comments/<?=$entry->id?>%>
 	
 </div>

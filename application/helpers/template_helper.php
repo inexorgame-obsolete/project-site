@@ -145,7 +145,7 @@ if(!function_exists('prevent_replace')) {
 	 * @param string $string The string containing the curly brackets
 	 * @return string The string which prevents the curly brackets from being replaced
 	 */
-	function prevent_replace($string) { return str_replace(array("{", "}"), array("{<", ">}"), $string); }
+	function prevent_replace($string) { return htmlentities($string); }
 }
 if(!function_exists('p_r'))
 {

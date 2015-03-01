@@ -25,7 +25,7 @@ else:
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>{sitetitle}</title>
+	<title><%=sitetitle%></title>
 	<style>
 		a:link {
 			font-weight: bold;
@@ -41,7 +41,7 @@ else:
 <header style="border-bottom: 1px solid #CCC; padding: 10px;">
 	<div style="height: 70px; color: #000;">
 		<a href="<?=site_url();?>" style="text-decoration: none;">
-			<img src="<?=site_url('data/images/logo_small.png');?>" alt="{sitetitle}" style="height: 70px;">
+			<img src="<?=site_url('data/images/logo_small.png');?>" alt="<%=sitetitle%>" style="height: 70px;">
 		</a>
 		<a href="<?=site_url();?>" style="
 		vertical-align: top;
@@ -59,7 +59,7 @@ else:
 		font-size: 24px;
 		padding-left: 10px;
 		line-height: 40px;
-		display: inline-block;">{sitetitle}</span>
+		display: inline-block;"><%=sitetitle%></span>
 		</a>
 	</div>
 </header>
@@ -67,7 +67,7 @@ else:
 	<?=_generate_email_markup($content);?>
 </div>
 <footer style="background-color: #EFEFEF; border-top: 1px solid #CCC; padding: 10px; color: #999;">
-	&copy; by {sitetitle} in <?=date('Y');?>
+	&copy; by <%=sitetitle%> in <?=date('Y');?>
 </footer>
 </body>
 </html>

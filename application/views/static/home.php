@@ -1,5 +1,5 @@
 <div class="centered">
-	<h1 class="text-contrast in-eyecatcher">The {sitetitle}-Project</h1>
+	<h1 class="text-contrast in-eyecatcher">The <%=sitetitle%>-Project</h1>
 	<h2>New particle system</h2>
 	<p>The new particle system is highly dynamic. There are multiple configurable particle emitters, renderers and modifiers. That means that, for example, you can include particles with multiple gravity points.</p>
 	<p>But see it yourself:</p>
@@ -11,7 +11,7 @@
 <div class="wrapper">
 <div class="centered">
 	<h2>Ambient Occlusion</h2>
-	<p>Ambient occlusion is a new way to light your maps. It adds shadows to the corners of your maps to let them look more realistic. In addition, it has no influence on your performance (lower fps and so on). It only needs a few more seconds to execute <code>/calclight 1</code> on your map. Furthermore the new map does not need a modified client. It only needs the {sitetitle}-client for lighting your maps.</p>
+	<p>Ambient occlusion is a new way to light your maps. It adds shadows to the corners of your maps to let them look more realistic. In addition, it has no influence on your performance (lower fps and so on). It only needs a few more seconds to execute <code>/calclight 1</code> on your map. Furthermore the new map does not need a modified client. It only needs the <%=sitetitle%>-client for lighting your maps.</p>
 	<p>Here is a little comparison of some maps:</p>
 </div>
 </div>
@@ -89,13 +89,13 @@
 	<div class="download-game-inner">
 		<div class="content">
 			<h2>Download</h2>
-			<p>Currently the project is in an early state. Because of this just the sourcecode of {sitetitle} is available.</p>
+			<p>Currently the project is in an early state. Because of this just the sourcecode of <%=sitetitle%> is available.</p>
 			<ul class="downloads">
-                                <li><a class="icon-windows" href="https://github.com/inexor-game/code/tree/master" target="_blank">{sitetitle} for Windows</a></li>
-                                <li><a class="icon-mac" href="https://github.com/inexor-game/code/tree/master" target="_blank">{sitetitle} for Mac</a></li>
-                                <li><a class="icon-linux" href="https://github.com/inexor-game/code/tree/master" target="_blank">{sitetitle} for Linux</a></li>
-                                <li><a class="icon-github" href="https://github.com/inexor-game/code/tree/master" target="_blank">{sitetitle} sourcecode</a></li>
-                                <li><a href="http://nightly.inexor.org" target="_blank">{sitetitle} nightly builds</li>
+                                <li><a class="icon-windows" href="https://github.com/inexor-game/code/tree/master" target="_blank"><%=sitetitle%> for Windows</a></li>
+                                <li><a class="icon-mac" href="https://github.com/inexor-game/code/tree/master" target="_blank"><%=sitetitle%> for Mac</a></li>
+                                <li><a class="icon-linux" href="https://github.com/inexor-game/code/tree/master" target="_blank"><%=sitetitle%> for Linux</a></li>
+                                <li><a class="icon-github" href="https://github.com/inexor-game/code/tree/master" target="_blank"><%=sitetitle%> sourcecode</a></li>
+                                <li><a href="http://nightly.inexor.org" target="_blank"><%=sitetitle%> nightly builds</li>
 			</ul>
 		</div>
 	</div>
