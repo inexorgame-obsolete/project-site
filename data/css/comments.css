@@ -52,6 +52,7 @@
 }
 .answer .user-image {
 	transition: opacity .25s;
+	display: none;
 	opacity: 0;
 }
 .answer {
@@ -71,7 +72,6 @@
 {
 	margin-left: 72px;
 }
-
 .comments textarea {
 	resize: vertical;
 	margin: -10px;
@@ -87,12 +87,27 @@
 .answer .comment-actions {
 	display: none;
 }
-.answer:hover  > .user-image, 
+.answer.expanded  > .user-image, 
 .answer:target > .user-image {
 	display: inline-block;
 	opacity: 1;
 }
-.answer:hover  > .comment-actions, 
+.comments .comment > .expander
+{
+	display: none;
+}
+.comments .answer > .expander {
+	display: inline-block;
+	cursor: pointer;
+	position: absolute;
+	left: 55px;
+	top: 12px;
+}
+.answer.expanded > .expander,
+.answer:target > .expander {
+	display: none;
+}
+.answer.expanded  > .comment-actions, 
 .answer:target > .comment-actions {
 	display: inline-block;
 }
@@ -120,4 +135,14 @@
 }
 .comments-error {
 	margin-left: 5px;
+}
+.comment-actions .rating {
+	font-weight: bold;
+}
+.comment-actions > *:after {
+	font-weight: 100;
+	content: ' \00B7'; /* &sdot; */
+}
+.comment-actions > *:last-child:after {
+	content: '';
 }

@@ -12,6 +12,8 @@ class Commentsapi extends CI_Controller {
 		parent::__construct();
 		$this->load->library("auth");
 		$this->load->library('comments');
+		$this->load->library('apiaccess');
+		$this->apiaccess->check(true);
 	}
 
 	public function index()
@@ -122,7 +124,8 @@ class Commentsapi extends CI_Controller {
 			$this->create();
 			return;
 		}
-		$this->api($method, array_shift($params), $params);
+		array_unshift($params, $method);
+		$this->api($params);
 	}
 
 	private function set_output($output)

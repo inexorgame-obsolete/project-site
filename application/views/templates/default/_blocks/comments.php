@@ -11,18 +11,21 @@ if(!function_exists('display_comments'))
 		foreach($comments as $c): 
 ?>
 		<div class="comment<?=($is_answer)? ' answer' : '';?>" id="comment-<?=$c->id?>">
+			<?=$is_answer ? '<a href="#comment-' . $c->id . '" class="fa fa-caret-right expander"></a>' : '';?>
 			<div class="comment-text">
 				<a href="<?=site_url('user/'.$c->creator->id)?>"><?=showname($c->creator)?></a>
-				<span class="text"><?=p_r($c->comment)?></span>
+				<span class="text"><?=htmlentities($c->comment)?></span>
 			</div>
 			<div class="comment-actions">
-				<?=dt_tm($c->date)?> &sdot;
+				<?=dt_tm($c->date)?> 
 				<?php if($answer != $c->id) : ?>
 					<a href="?answer=<?=$c->id?>#comment-<?=$c->id?>" data-comment-answer="<?=$c->id?>">Answer</a>
 				<?php endif; ?>
 				<?php if(!isset($c->answers) && $c->count_answers > 0) : ?>
-					&sdot; <a href="?answers=<?=$c->id?>#comment-<?=$c->id?>" data-comment-answers="true" data-comment-reference="<?=$c->id?>" data-comment-action="next">Show answers (<?=$c->count_answers?>)</a>
+					 <a href="?answers=<?=$c->id?>#comment-<?=$c->id?>" data-comment-answers="true" data-comment-reference="<?=$c->id?>" data-comment-action="next">Show answers (<?=$c->count_answers?>)</a>
 				<?php endif; ?>
+				
+				<?php echo $c->ratings->display_small('comment-' . $c->id); ?>
 			</div>
 			<a class="user-image" href="<?=site_url('user/'.$c->creator->id)?>"><img src="<?=avatar_image($c->creator->id);?>" class="avatar" /></a>
 			<?=/*($is_answer) ? '<span class="voting">123</span>':'';*/'' ?>
