@@ -7,7 +7,7 @@
 		</section><!--
 		--><section>
 			<div class="inner">
-				<h2>{sitetitle}</h2>
+				<h2><%=sitetitle%></h2>
 				<ul>
 					<li><a href="<?=site_url();?>">Project</a></li>
 					<li><a href="<?=site_url('team')?>">Team</a></li>
@@ -18,11 +18,6 @@
 		</section><!--
 		--><section>
 			<div class="inner">
-				<h2>Services</h2>
-				<ul>
-					<li><a href="<?=site_url('activity');?>">Actvity-Log</a></li>
-					<li><a href="<?=site_url('irclog')?>">IRC-Log</a></li>
-				</ul>
 			</div>
 		</section><!--
 		--><section>

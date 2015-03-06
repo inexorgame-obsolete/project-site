@@ -1,6 +1,6 @@
 <div class="centered">
-	<h1 class="text-contrast in-eyecatcher">The {sitetitle}-Team</h1>
-	<p>The {sitetitle}-team consists of multiple projects.
+	<h1 class="text-contrast in-eyecatcher">The <%=sitetitle%>-Team</h1>
+	<p>The <%=sitetitle%>-team consists of multiple projects.
 		<ul>
 			<li>The <a href="#sauerfork-main">main-project</a> with all the new features like the ambient-occlusion, new particle-system or atom-shell.</li>
 			<li>The <a href="#sauerfork-data">data-part</a> of the project with its new maps, models and textures.</li>
@@ -8,7 +8,7 @@
 		</ul>
 	</p>
 
-	<h2 id="sauerfork-main">{sitetitle}</h2>
+	<h2 id="sauerfork-main"><%=sitetitle%></h2>
 	
 	<?php $has_section = false; 
 	$section = 'main';
@@ -59,7 +59,7 @@
 		</p>
 	<?php endif; ?>
 
-	<h2 id="sauerfork-data">{sitetitle} Data</h2>
+	<h2 id="sauerfork-data"><%=sitetitle%> Data</h2>
 
 	<?php $has_section = false; 
 	$section = 'data';
@@ -110,7 +110,7 @@
 		</p>
 	<?php endif; ?>
 
-	<h2 id="sauerfork-website">{sitetitle} Website</h2>
+	<h2 id="sauerfork-website"><%=sitetitle%> Website</h2>
 
 	<?php $has_section = false; 
 	$section = 'website';

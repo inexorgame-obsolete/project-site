@@ -145,7 +145,7 @@ if(!function_exists('prevent_replace')) {
 	 * @param string $string The string containing the curly brackets
 	 * @return string The string which prevents the curly brackets from being replaced
 	 */
-	function prevent_replace($string) { return str_replace(array("{", "}"), array("{<", ">}"), $string); }
+	function prevent_replace($string) { return htmlentities($string); }
 }
 if(!function_exists('p_r'))
 {
@@ -185,11 +185,12 @@ if(!function_exists('dt'))
 {
 	/**
 	 * Returns a correctly formated date
-	 * @param mixed $date STRING(datestring) | INT(unix-time-format)
+	 * @param mixed   $date STRING(datestring) | INT(unix-time-format)
+	 * @param boolean $disable_wrapper disables the wrapper for moment.js
 	 * @return string
 	 */
-	function dt($date) {
-		return 'on ' . date('j\<\s\u\p\>S\<\/\s\u\p\> \o\f F Y', strtotime($date)); // return somethint like 1st of January 2014
+	function dt($date, $disable_wrapper = false) {
+		return ($disable_wrapper ? '' : '<span data-moment="' . $date . '">') . 'on ' . date('j\<\s\u\p\>S\<\/\s\u\p\> \o\f F Y', strtotime($date)) . ($disable_wrapper ? '' : '</span>'); // return somethint like 1st of January 2014
 	}
 }
 if(!function_exists('tm'))
@@ -197,19 +198,21 @@ if(!function_exists('tm'))
 	/**
 	 * Returns correctly formated time
 	 * @param mixed $date STRING(datestring) | INT(unix-time-format)
+	 * @param boolean $disable_wrapper disables the wrapper for moment.js
 	 * @return string
 	 */
-	function tm($time){
-		return 'at ' . date('H:i:s', strtotime($time));
+	function tm($time, $disable_wrapper = false){
+		return ($disable_wrapper ? '' : '<span data-moment="' . $time . '">') . 'at ' . date('H:i:s', strtotime($time)) . ($disable_wrapper ? '' : '</span>');
 	}
 }
 if(!function_exists('dt_tm')) {
 	/**
 	 * Returns correctly formated date-time
 	 * @param mixed $date STRING(datestring) | INT(unix-time-format)
+	 * @param boolean $disable_wrapper disables the wrapper for moment.js
 	 * @return string
 	 */
-	function dt_tm($time) {
-		return dt($time) . ' ' . tm($time);
+	function dt_tm($time, $disable_wrapper = false) {
+		return ($disable_wrapper ? '' : '<span data-moment="' . $time . '">') . dt($time, true) . ' ' . tm($time, true) . ($disable_wrapper ? '' : '</span>');
 	}
 }

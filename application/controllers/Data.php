@@ -25,6 +25,8 @@ class Data extends CI_Controller {
 	 * @return type
 	 */
 	public function api($command = FALSE, $ownerid = FALSE) {
+		$this->load->library('apiaccess');
+		$this->apiaccess->check(true);
 		$this->user = $this->auth->user();
 		$this->output->set_content_type('application/json');
 		if(!$this->user) {

@@ -58,6 +58,8 @@ class Search extends CI_Controller {
 	 */
 	function api($object, $search, $start = 0, $limit = 30)
 	{
+		$this->load->library('apiaccess');
+		$this->apiaccess->check(true);
 		if(strlen($search) < $this->config->item('min_chars'))
 		{
 			$results = array('error' => array('message' => 'You have to enter minimum ' . $this->config->item('min_chars') . ' characters to get any results!', 'reason' => 'min_letters'));

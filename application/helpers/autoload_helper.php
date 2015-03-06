@@ -10,6 +10,17 @@ if(!function_exists('intis'))
 		return (ctype_digit($val) || is_int($val));
 	}
 }
+if(!function_exists('int_val'))
+{
+	/**
+	 * Checks if a string contains an int or already is an int.
+	 * @param mixed $val value to be checked
+	 * @return bool 
+	 */
+	function int_val($val) {
+		return (ctype_digit($val) || is_int($val));
+	}
+}
 if(!function_exists('isint')) {
 	/**
 	 * Checks if a string contains an int or already is an int and converts to an int if it is a astring in an int.

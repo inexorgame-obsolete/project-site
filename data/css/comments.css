@@ -1,0 +1,148 @@
+.comment {
+	min-width: 580px;
+	background-color: #EFEFEF;
+	border: 1px solid #CCC;
+	border-radius: 5px;
+	overflow-x: auto;
+	overflow-y: hidden;
+	height: 100%;
+	position: relative;
+	padding-bottom: 10px;
+	margin-bottom: 10px;
+}
+.comment.answer {
+	overflow: visible;
+	width: auto;
+}
+.comment .voting {
+	width: 72px;
+	display: inline-block;
+	position: absolute;
+	top: 70px;
+	text-align: center;
+}
+.comment .user-image {
+	position: absolute;
+	left: 10px;
+	top: 10px;
+}
+.comment .user {
+	padding-right: 10px;
+}
+.comment .comment-text {
+	background: #FFF;
+	padding: 10px;
+	margin-left: 72px;
+	border-bottom-left-radius: 5px;
+}
+.comment .comment-actions {
+	font-size: 13px;
+	margin-left: 72px;
+	padding: 5px 10px;
+}
+.comment-actions a {
+	cursor: pointer;
+	font-weight: bold;
+}
+.answer {
+	margin-top: 1px;
+	padding-bottom: 0;
+	margin-bottom: 0;
+	border: none;
+}
+.answer .user-image {
+	transition: opacity .25s;
+	display: none;
+	opacity: 0;
+}
+.answer {
+	margin-left: 75px;
+}
+.comments-wrapper {
+	background: #FFF;
+	padding: 10px;
+	margin-left: 147px;
+	display: block;
+}
+.comments input[type=submit] {
+	margin-left: 147px;
+}
+.create-comment .comments-wrapper, 
+.create-comment input[type=submit]
+{
+	margin-left: 72px;
+}
+.comments textarea {
+	resize: vertical;
+	margin: -10px;
+	padding: 10px;
+	width: 100%;
+	border: none;
+}
+.answers .comments-wrapper,
+.answers input[type=submit] {
+	margin-left: 147px;
+}
+
+.answer .comment-actions {
+	display: none;
+}
+.answer.expanded  > .user-image, 
+.answer:target > .user-image {
+	display: inline-block;
+	opacity: 1;
+}
+.comments .comment > .expander
+{
+	display: none;
+}
+.comments .answer > .expander {
+	display: inline-block;
+	cursor: pointer;
+	position: absolute;
+	left: 55px;
+	top: 12px;
+}
+.answer.expanded > .expander,
+.answer:target > .expander {
+	display: none;
+}
+.answer.expanded  > .comment-actions, 
+.answer:target > .comment-actions {
+	display: inline-block;
+}
+.answer:hover .voting, .answer:target .voting {
+	opacity: 0;
+}
+.show-comments-button,
+.show-answers-button {
+	cursor: pointer;
+	display: block;
+	padding: 5px;
+	margin: 5px 10px 5px 10px;
+	background-color: #ECECEC;
+	text-align: center;
+	border-radius: 3px;
+	font-weight: 500 !important;
+	border: 1px solid #999;
+}
+.show-answers-button {
+	margin-left: 167px;
+}
+.show-comments-button:hover,
+.show-answers-button:hover {
+	background-color: #DCDCDC;
+}
+.comments-error {
+	margin-left: 5px;
+}
+.comment-actions .rating {
+	font-weight: bold;
+}
+.comment-actions > *:after {
+	font-weight: 100;
+	content: ' \00B7'; /* &sdot; */
+}
+.comment-actions > *:last-child:after {
+	content: '';
+}

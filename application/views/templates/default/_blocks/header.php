@@ -3,27 +3,40 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
- 	<title>{title}</title>
+ 	<title><%=title%></title>
 	<?php
 		dcss('style');
+		dcss('comments');
+		dcss('tooltipster');
 		dcss('nav');
 		dcss('OpenSans');
+		dcss('font-awesome');
+		dcss('font-awesome.extend');
 		dcss('big-device', '(min-width: 1100px)');
 		dcss('medium-device', '(max-width: 960px)');
 		dcss('small-device', '(max-width: 800px)');
 		dcss('mini-device', '(max-width: 600px)');
 	?>
 	<script src="<?=js('jquery')?>"></script>
+	<script src="<?=js('extendPrototype')?>"></script>
+	<script src="<?=js('jquery.tooltipster.min')?>"></script>
+	<script src="<?=js('template')?>"></script>
 	<script>
 		var default_search_api = '<?=$default_search_api;?>';
 		var base_url = <?="'".$base."'";?>;
 		var user_dir = <?php if(isset($user['id'])) echo "'data/user_upload/".$user['id']."/'"; else echo 'false'; ?>;
+		var logged_in = <?=isset($user['id']) ? 'true' : 'false';?>;
+		var time_string = "YYYY-MM-DD HH:mm:ss";
 	</script>
+	<script src="<?=js('main')?>"></script>
+	<script src="<?=js('rating')?>"></script>
+	<script src="<?=js('moment')?>"></script>
 	<script src="<?=js('search')?>"></script>
 	<script src="<?=js('nav')?>"></script>
+	<script src="<?=js('comments')?>"></script>
 	<link rel="prerender" href="<?=data('images/logo_extrasmall.png')?>" />
 	<link rel="prefetch" href="<?=data('images/logo_extrasmall.png')?>" />
-	{head}
+	<%=head%>
 </head>
 <body>
 <?php if ($logged_in !== false): ?>
@@ -91,8 +104,8 @@
 		<div class="border menu">
 			<div class="navigation">
 				<div class="helper">
-					<a href="<?=site_url()?>"><img src="<?=image('logo_small.png'); ?>" alt="{sitetitle}" /></a>
-					<span class="title"><a href="<?=site_url()?>">{sitetitle}</a></span>
+					<a href="<?=site_url()?>"><img src="<?=image('logo_small.png'); ?>" alt="<%=sitetitle%>" /></a>
+					<span class="title"><a href="<?=site_url()?>"><%=sitetitle%></a></span>
 				</div>
 				<ul id="main-menu">
 					<li><a href="<?=site_url();?>">Project</a></li>
@@ -150,7 +163,7 @@
 	</div>
 	<div id="header_placeholder">
 	</div>
-	<div id="main-eyecatcher" class="eyecatcher image-mover" style="background-image:url({eyecatcher_image:<?=iimage('eyecatcher');?>});">
+	<div id="main-eyecatcher" class="eyecatcher image-mover" style="background-image:url(<%=eyecatcher_image:<?=iimage('eyecatcher');?>%>);">
 	</div>
 	<div class="outfader">
 	</div>

@@ -28,31 +28,31 @@
 			<input style="display:none;" type="password" name="__password_workaround"/>
 			<div class="user-edit-item">
 				<?=form_label('Active', $edit_form['active']['id']);?>
-				<?=p_r(form_input($edit_form['active']));?>
+				<?=(form_input($edit_form['active']));?>
 			</div>
 			<div class="user-edit-item">
 				<?=form_label('E-Mail', $edit_form['email']['id']);?>
-				<?=p_r(form_input($edit_form['email']));?>
+				<?=(form_input($edit_form['email']));?>
 			</div>
 			<div class="user-edit-item">
 				<?=form_label('Username', $edit_form['username']['id']);?>
-				<?=p_r(form_input($edit_form['username']));?>
+				<?=(form_input($edit_form['username']));?>
 			</div>
 			<div class="user-edit-item">
 				<?=form_label('Ingame name', $edit_form['ingame_name']['id']);?>
-				<?=p_r(form_input($edit_form['ingame_name']));?>
+				<?=(form_input($edit_form['ingame_name']));?>
 			</div>
 			<div class="user-edit-item">
 				<?=form_label('New Password', $edit_form['password']['id']);?>
-				<?=p_r(form_input($edit_form['password']));?>
-				<?=p_r(form_input($edit_form['password_verification']));?>
+				<?=(form_input($edit_form['password']));?>
+				<?=(form_input($edit_form['password_verification']));?>
 			</div>
 			<div class="about user-edit-item">
 				<?=form_label('About', $edit_form['about']['id']);?>
-				<?=p_r(form_textarea($edit_form['about']));?>
+				<?=(form_textarea($edit_form['about']));?>
 				<div class="clear"></div>
 			</div>
-		<?=p_r(form_input($edit_form['submit']));?>
+		<?=(form_input($edit_form['submit']));?>
 		<?=form_close();?>
 	</div>
 </div>

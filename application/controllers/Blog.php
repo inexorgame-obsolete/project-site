@@ -17,6 +17,7 @@ class Blog extends CI_Controller {
 		$this->load->library('htmlfilter');
 		$this->load->library('permissions');
 		$this->load->library('auth');
+		$this->load->library('rating');
 
 		$this->_comments = $this->load->library('comments', array('project-blog'));
 
@@ -42,16 +43,19 @@ class Blog extends CI_Controller {
 		$permissions = $this->permissions->has_user_permission('blog');
 
 		$posts = $this->blog_model->get_posts_for_user($user ? $user->id : false, 10, $start, $this->permissions->has_user_permission('blog_publish_all'));
+		$ratings = array();
 		for($i = 0; $i < count($posts); $i++)
 		{
 			$posts[$i]['body'] = unserialize($posts[$i]['body']);
 			if(!isset($creators[$posts[$i]['user_id']])) {
 				$creators[$posts[$i]['user_id']] = $this->auth->user($posts[$i]['user_id']);
 			}
+			$ratings[$i] = $this->rating->get_ratings('blog', $posts[$i]['id']);
 		}
 		$data = array(
 			'posts' 			=> $posts, 
 			'creators' 			=> $creators,
+			'ratings'           => $ratings,
 			'max_pagination'	=> $this->blog_model->max_pagination(10, $user ? $user->id : false, $this->permissions->has_user_permission('blog_publish_all')),
 			'current_page'		=> $site + 1
 		);
@@ -100,7 +104,41 @@ class Blog extends CI_Controller {
 		else { $this->template->render_permission_error(); return; }
 
 		// Site exists, user is permitted to view.
+		
 		$this->comments->set_identifier($entry->id);
+
+		$comment_settings = array();
+		if(isset($_GET['answer']))
+			$comment_settings["include-comment"] = $_GET['answer'];
+
+		if(isset($_GET['answers']))
+		{
+			$comment_settings['answers-to'] = $_GET['answers'];
+			if(isset($_GET['end']))
+			{
+				$comment_settings['answers-to-limit'] = 30;
+				$comment_settings['answers-to-offset'] = (isint($_GET['end']) && $_GET['end'] <= 30) ? 0 : $_GET['end'] - 30;
+			}
+		} 
+		elseif(isset($_GET['end']))
+		{
+			$comment_settings['offset'] = array((isint($_GET['end']) && $_GET['end'] <= 30) ? 0 : $_GET['end'] - 30);
+		}
+
+		$this->template->variable_block(
+			"comments/" . $entry->id, 
+			'comments', 
+			array(
+				'commented'       => $this->comments->submit_comment(),
+				'offset'          => isset($comment_settings['offset']) ? $comment_settings['offset'] : array(0),
+				'comments'        => $this->comments->get_comments($comment_settings),
+				'module'          => $this->comments->get_module(),
+				'identifier'      => $this->comments->get_identifier(),
+				'user'            => $user,
+				'count_comments'  => $this->comments->count(),
+				'answers_offset'  => isset($comment_settings['answers-to-offset']) ? $comment_settings['answers-to-offset'] : 0
+			), 
+			TRUE);
 
 		$data['entry'] = $entry;
 		$data['creator'] = $this->auth->user($entry->user_id);
@@ -110,6 +148,8 @@ class Blog extends CI_Controller {
 		$data['user_edit_others'] = false;
 		if($permissions && $this->permissions->has_user_permission('blog_publish')) $data['user_may_release'] = true;
 		if($permissions && $this->permissions->has_user_permission('blog_edit_all')) $data['user_edit_others'] = true;
+
+		$data['rating'] = $this->rating->get_ratings('blog', $entry->id);
 
 		$this->load->view('blog/view', $data);
 	}

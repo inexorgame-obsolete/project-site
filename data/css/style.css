@@ -1,3 +1,11 @@
+@keyframes highlight-error {
+	from{box-shadow: inset 0 0 5px #F66;}
+	to  {box-shadow: inset 0 0 0px #F66;}
+}
+@-webkit-keyframes highlight-error {
+	from{box-shadow: inset 0 0 5px #F66;}
+	to  {box-shadow: inset 0 0 0px #F66;}
+}
 body, html {
 	margin: 0;
 	padding: 0;
@@ -58,6 +66,9 @@ hr {
 	height: 1px;
 	background-color: #CCC;
 	clear: both;
+}
+textarea.error {
+	-webkit-animation: highlight-error 1.5s;
 }
 pre.inline {
 	display: inline-block;
@@ -604,6 +615,7 @@ h1.in-eyecatcher {
 	border-radius: 5px;
 	position: relative;
 	margin-bottom: 10px;
+	padding: 10px;
 }
 .spotlight > a {
 	min-height: 50px;
@@ -613,6 +625,7 @@ h1.in-eyecatcher {
 	padding: 10px;
 	line-height: 22px;
 	height: 100%;
+	margin: -10px 10px -10px -10px;
 }
 .spotlight .fixed {
 	width: 25%;
@@ -660,15 +673,90 @@ h1.in-eyecatcher {
 	width: 100%;
 	resize: vertical;
 }
-.edit-icon {
-	opacity: 0.5;
-	background-image: url(../images/icons/edit.png);
-	width: 26px;
-	height: 26px;
-	background-position: 0 0;
-	background-size: 26px 52px;
+/* ratings */
+.rating-small {
 	display: inline-block;
 }
-.edit-icon:hover {
-	background-position: 0 26px;
+.rating-medium {
+	width: 160px;
+	display: inline-block;
+	text-align: center;
+	background-color: #EFEFEF;
+	height: 60px;
+	border: 1px solid #CCC;
+	margin: 10px auto;
+	position: relative;
 }
+.rating-medium .rating {
+	position: absolute;
+	display: inline-block;
+	width: 100px;
+	left: 0;
+	top: 0;
+	height: 60px;
+	line-height: 60px;
+	font-size: 30px;
+}
+.rating-medium .up, .rating-medium .down,
+.rating-large .up, .rating-large .down {
+	font-size: 16px;
+	color: #EFEFEF;
+	position: absolute;
+	display: block;
+	width: 60px;
+	height: 50%;
+	right: 0;
+	top: 0;
+	background: #090 !important;
+}
+.rating-medium .down,
+.rating-large .down {
+	right: 0;
+	top: 50%;
+	background: #900 !important;
+}
+.rating-large {
+	margin: auto;
+	background: #EFEFEF;
+	display: inline-block;
+	line-height: 60px;
+	font-size: 30px;
+	border: 1px solid #CCC;
+	position: relative;
+}
+.rating-large .rating {
+	width: 100px;
+	padding-right: 60px;
+	display: inline-block;
+	text-align: center;
+}
+.rating-positive,
+.rating-negative,
+.rating-neutral {
+	text-align: center;
+	color: #333;
+	position: relative;
+	display: inline-block;
+	min-width: 100px;
+	height: 100%;
+}
+.rating-neutral {
+	color: #000;
+}
+.rating-positive {
+	background-color: #cbe2cb;
+}
+.rating-negative {
+	background-color: #e2cbcb;
+}
+/* spotlight rating */
+.spotlight-rating {
+	top: 0;
+	float: right;
+	margin: -11px -11px -16px 10px;
+}
+.spotlight-rating .rating-medium {
+	margin: 0;
+	height: 70px;
+}
+			
