@@ -18,11 +18,6 @@
 		</section><!--
 		--><section>
 			<div class="inner">
-				<h2>Services</h2>
-				<ul>
-					<li><a href="<?=site_url('activity');?>">Actvity-Log</a></li>
-					<li><a href="<?=site_url('irclog')?>">IRC-Log</a></li>
-				</ul>
 			</div>
 		</section><!--
 		--><section>
