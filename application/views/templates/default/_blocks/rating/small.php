@@ -1,0 +1,7 @@
+<?=form_open(current_url() . $anchor, array('class' => 'rating-small', 'data-current-user-rating' => $user_vote))?>
+<?=form_hidden('rate_module', $module)?>
+<?=form_hidden('rate_identifier', $identifier)?> 
+<button type="submit" name="rating"<?=($logged_in ? '' : ' disabled="" title="You have to log in or create an account to vote."')?> <?=($own_post ? 'disabled="disabled" title="You can not rate your own posts." ' : '')?>data-rating-button="down" class="fa fa-minus-square<?=$user_vote != -1 ? '-o' : ''?> fa-only" value="<?=$user_vote != -1 ? 'down' : 'remove'?>" /></button>
+<span class="rating" title="positive: <?=$positive?>, negative: <?=$negative?>, overall: <?=$ratings?>" data-positive="<?=$positive?>" data-negative="<?=$negative?>" data-overall="<?=$ratings?>" data-tooltip="positive: &lt;strong&gt;%positive&lt;/strong&gt;, negative: &lt;strong&gt;%negative&lt;/strong&gt;, overall: &lt;strong&gt;%overall&lt;/strong&gt;"><?=$rating?></span>
+<button type="submit" name="rating"<?=($logged_in ? '' : ' disabled="" title="You have to log in or create an account to vote."')?> <?=($own_post ? 'disabled="disabled" title="You can not rate your own posts." ' : '')?>data-rating-button="up" class="fa fa-plus-square<?=$user_vote != 1 ? '-o' : ''?> fa-only" value="<?=$user_vote != 1 ? 'up' : 'remove'?>" /></button>
+<?=form_close();?>
