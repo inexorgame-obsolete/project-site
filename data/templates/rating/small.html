@@ -1,0 +1,7 @@
+<form action="<%=location%>" class="rating-small" data-current-user-rating="<%=userrating:0%>" method="post" accept-charset="utf-8">
+	<input type="hidden" name="rate_module" value="<%=module%>">
+	<input type="hidden" name="rate_identifier" value="<%=identifier%>">
+	<button type="submit" name="rating"<%=disabled: disabled="" title="You have to log in or create an account to vote."%> data-rating-button="down" class="fa fa-minus-square<%=rateiconnegative:-o%> fa-only" value="<%=downvote:down%>"></button>
+	<span class="rating" data-positive="<%=positiveratings%>" data-negative="<%=negativeratings%>" data-overall="<%=overallratings%>" data-tooltip="positive: <strong>%positive</strong>, negative: <strong>%negative</strong>, overall: <strong>%overall</strong>"><%=rating%></span>
+	<button type="submit" name="rating"<%=disabled: disabled="" title="You have to log in or create an account to vote."%> data-rating-button="up" class="fa fa-plus-square<%=rateiconpositive:-o%> fa-only" value="<%=upvote:up%>"></button>
+</form>
