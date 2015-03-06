@@ -385,7 +385,7 @@ class User extends CI_Controller {
 			'type'  => 'password',
 			'value' => isset($_POST['password_verification']) ? $_POST['password_verification'] : '',
 		);
-		$data['captcha'] = $this->template->prevent_variables($this->recaptcha->get_html());
+		$data['captcha'] = $this->recaptcha->get_html();
 		return $data;
 	}
 

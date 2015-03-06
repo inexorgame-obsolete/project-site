@@ -8,12 +8,12 @@ else:
 		$return = '';
 		foreach($contents as $content) {
 			if(isset($content['tag'])) $return .= '<' . $content['tag'];
-			if(isset($content['css'])) $return .= ' style="' . p_r($content['css']) . '"';
+			if(isset($content['css'])) $return .= ' style="' . htmlentities($content['css']) . '"';
 			if(isset($content['tag'])) $return .= '>';
 			foreach($content as $i => $c) {
 				if($i != 'tag' && $i != 'css') {
 					if(is_array($c)) $return .= _generate_email_markup($c);
-					else $return .= p_r(auto_link($c));
+					else $return .= auto_link(html_entities($c));
 				}
 			}
 			if(isset($content['tag'])) $return .= '</' . $content['tag'] . '>';
