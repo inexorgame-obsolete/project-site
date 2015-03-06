@@ -17,6 +17,7 @@ class Blog extends CI_Controller {
 		$this->load->library('htmlfilter');
 		$this->load->library('permissions');
 		$this->load->library('auth');
+		$this->load->library('rating');
 
 		$this->_comments = $this->load->library('comments', array('project-blog'));
 
@@ -42,16 +43,19 @@ class Blog extends CI_Controller {
 		$permissions = $this->permissions->has_user_permission('blog');
 
 		$posts = $this->blog_model->get_posts_for_user($user ? $user->id : false, 10, $start, $this->permissions->has_user_permission('blog_publish_all'));
+		$ratings = array();
 		for($i = 0; $i < count($posts); $i++)
 		{
 			$posts[$i]['body'] = unserialize($posts[$i]['body']);
 			if(!isset($creators[$posts[$i]['user_id']])) {
 				$creators[$posts[$i]['user_id']] = $this->auth->user($posts[$i]['user_id']);
 			}
+			$ratings[$i] = $this->rating->get_ratings('blog', $posts[$i]['id']);
 		}
 		$data = array(
 			'posts' 			=> $posts, 
 			'creators' 			=> $creators,
+			'ratings'           => $ratings,
 			'max_pagination'	=> $this->blog_model->max_pagination(10, $user ? $user->id : false, $this->permissions->has_user_permission('blog_publish_all')),
 			'current_page'		=> $site + 1
 		);
@@ -144,6 +148,8 @@ class Blog extends CI_Controller {
 		$data['user_edit_others'] = false;
 		if($permissions && $this->permissions->has_user_permission('blog_publish')) $data['user_may_release'] = true;
 		if($permissions && $this->permissions->has_user_permission('blog_edit_all')) $data['user_edit_others'] = true;
+
+		$data['rating'] = $this->rating->get_ratings('blog', $entry->id);
 
 		$this->load->view('blog/view', $data);
 	}

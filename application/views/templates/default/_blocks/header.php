@@ -10,6 +10,8 @@
 		dcss('tooltipster');
 		dcss('nav');
 		dcss('OpenSans');
+		dcss('font-awesome');
+		dcss('font-awesome.extend');
 		dcss('big-device', '(min-width: 1100px)');
 		dcss('medium-device', '(max-width: 960px)');
 		dcss('small-device', '(max-width: 800px)');
@@ -25,11 +27,9 @@
 		var user_dir = <?php if(isset($user['id'])) echo "'data/user_upload/".$user['id']."/'"; else echo 'false'; ?>;
 		var logged_in = <?=isset($user['id']) ? 'true' : 'false';?>;
 		var time_string = "YYYY-MM-DD HH:mm:ss";
-		$.setTemplateGlobal('BASE_URL', base_url);
-		$.setTemplateGlobal('COMMENTS_API', 'commentsapi')
-		$.setTemplateLocation(base_url + 'data/templates/')
 	</script>
 	<script src="<?=js('main')?>"></script>
+	<script src="<?=js('rating')?>"></script>
 	<script src="<?=js('moment')?>"></script>
 	<script src="<?=js('search')?>"></script>
 	<script src="<?=js('nav')?>"></script>

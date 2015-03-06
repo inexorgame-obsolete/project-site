@@ -10,11 +10,11 @@
 	<div class="spotlight">
 		<a href="<?=site_url('user/'.$creator->id)?>"><div class="avatar" style="background-image:url(<?=avatar_image($creator->id)?>);"></div><?=showname($creator);?>
 		<br /><span class="date" title="<?=tm($entry->timestamp, true)?>"><?=dt($entry->timestamp)?></span></a>
-		<div class="about">
-			<?=d($creator->about);?>
-		</div>
+		<em><?=d($creator->about);?></em>
 	</div>
-
+	<center>
+		<?=$rating->display_large();?>
+	</center>
 	<h2 id="comments-section">Comments</h2>
 
 	<%=comments/<?=$entry->id?>%>

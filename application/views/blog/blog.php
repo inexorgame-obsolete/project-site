@@ -1,7 +1,7 @@
 <div class="centered">
 	<h1 class="text-contrast in-eyecatcher">Blog</h1>
 </div>
-<?php foreach($posts as $entry): ?>
+<?php foreach($posts as $i => $entry): ?>
 	<?php $creator = $creators[$entry['user_id']]; ?>
 <div class="blog-centered">
 	<h1><a href="<?=site_url('blog/view/' . $entry['id'])?>"><?=d($entry['headline'])?></a></h1>
@@ -15,9 +15,11 @@
 	<div class="spotlight">
 		<a href="<?=site_url('user/'.$entry['user_id'])?>"><div class="avatar" style="background-image:url(<?=avatar_image($entry['user_id'])?>);"></div><?=showname($creator);?>
 		<br /><span class="date"><?=dt($entry['timestamp'])?></span></a>
-		<div class="about">
-			<?=d($creator->about);?>
-		</div>
+		
+		<div class="spotlight-rating"><?=$ratings[$i]->display_medium()?></div>
+		
+		<em><?=d($creator->about);?></em>
+
 	</div>
 </div>
 <?php endforeach; ?>
