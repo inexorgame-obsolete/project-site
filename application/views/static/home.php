@@ -6,7 +6,7 @@
 </div>
 </div>
 <div class="video-coverage video-particles">
-	<iframe class="video" src="//www.youtube-nocookie.com/embed/REemgV1OjdQ?theme=dark&rel=0" frameborder="0" allowfullscreen height="540px" style="max-width:100%;"></iframe>
+	<iframe class="video" src="//www.youtube-nocookie.com/embed/1_HYaKJiV24?theme=dark&rel=0&showinfo=0" frameborder="0" allowfullscreen height="540px" style="max-width:100%;"></iframe>
 </div>
 <div class="wrapper">
 <div class="centered">
